@@ -1,0 +1,774 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+  <title>GuraNeza · Profile – mobile</title>
+  <!-- Font Awesome 6 -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <!-- Google Fonts: Inter -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+    body { background: #f5f7fa; color: #131b2c; line-height: 1.5; min-height: 100vh; display: flex; flex-direction: column; }
+
+    /* === TOP BAR (logo, let's shop, drawer trigger) === */
+    .top-bar {
+      position: sticky; top: 0; z-index: 150;
+      background: rgba(255,255,255,0.92); backdrop-filter: blur(12px);
+      border-bottom: 1px solid rgba(0,0,0,0.02);
+      padding: 0.5rem 1rem;
+      display: flex; align-items: center; justify-content: space-between;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.02);
+    }
+    .logo-area { display: flex; align-items: center; gap: 0.3rem; }
+    .logo-icon { font-size: 1.6rem; color: #0f3b5c; }
+    .logo-text { font-weight: 700; font-size: 1.2rem; color: #131b2c; }
+    .logo-text span { color: #0f3b5c; background: #e1effa; padding: 0.15rem 0.4rem; border-radius: 30px; font-size: 0.7rem; margin-left: 0.2rem; }
+
+    .top-actions { display: flex; align-items: center; gap: 0.5rem; }
+    .letshop-btn {
+      width: 38px; height: 38px; border-radius: 50%; border: none;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.1rem; background: #ecf2f8; color: #0f3b5c; border: 1px solid #dae2ec;
+      cursor: pointer;
+    }
+    .drawer-trigger {
+      width: 38px; height: 38px; border-radius: 50%; border: none;
+      background: #0f3b5c; color: white; font-size: 1.2rem;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; box-shadow: 0 4px 8px rgba(15,59,92,0.15);
+    }
+
+    /* === SIDE DRAWER (cart, profile, options, logout, lang) === */
+    .drawer-overlay {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background-color: rgba(0,0,0,0.2); backdrop-filter: blur(3px);
+      z-index: 200; visibility: hidden; opacity: 0;
+      transition: opacity 0.2s ease, visibility 0.2s;
+    }
+    .drawer-overlay.active { visibility: visible; opacity: 1; }
+    .drawer {
+      position: fixed; top: 0; right: -280px; width: 260px; height: 100%;
+      background: white; box-shadow: -4px 0 20px rgba(0,0,0,0.1);
+      z-index: 250; padding: 1.5rem 1rem; transition: right 0.25s ease;
+      display: flex; flex-direction: column;
+    }
+    .drawer.active { right: 0; }
+    .drawer-header {
+      display: flex; align-items: center; gap: 0.8rem; margin-bottom: 1.8rem;
+      border-bottom: 1px solid #ecf2f8; padding-bottom: 1rem;
+    }
+    .drawer-profile-img {
+      width: 48px; height: 48px; border-radius: 50%; background: #e1effa;
+      display: flex; align-items: center; justify-content: center;
+      color: #0f3b5c; font-size: 1.6rem; border: 2px solid white;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.05); overflow: hidden;
+    }
+    .drawer-profile-img img { width: 100%; height: 100%; object-fit: cover; }
+    .drawer-profile-name { font-weight: 600; color: #1e3e5c; font-size: 0.95rem; }
+    .drawer-item {
+      display: flex; align-items: center; gap: 1rem; padding: 0.8rem 0.5rem;
+      color: #1e2a3a; text-decoration: none; font-size: 0.9rem; border-radius: 12px;
+      transition: background 0.1s; cursor: pointer;
+    }
+    .drawer-item i { width: 24px; color: #0f3b5c; font-size: 1.1rem; }
+    .drawer-item:hover { background: #f0f8ff; }
+    .drawer-divider { height: 1px; background: #ecf2f8; margin: 0.8rem 0; }
+    .drawer-cart-badge {
+      background: #0f3b5c; color: white; border-radius: 30px;
+      padding: 0.15rem 0.5rem; font-size: 0.7rem; margin-left: auto;
+    }
+    .close-drawer {
+      position: absolute; top: 1rem; left: 1rem; font-size: 1.4rem;
+      color: #8b9bb0; cursor: pointer;
+    }
+
+    /* === BOTTOM NAV (home, buy, sell, shops) === */
+    .bottom-nav {
+      position: fixed; bottom: 0; left: 0; width: 100%; z-index: 100;
+      background: rgba(255,255,255,0.92); backdrop-filter: blur(12px);
+      border-top: 1px solid #e6ecf3; display: flex; justify-content: space-around;
+      padding: 0.4rem 0.5rem; box-shadow: 0 -4px 10px rgba(0,0,0,0.02);
+    }
+    .nav-item {
+      display: flex; flex-direction: column; align-items: center; gap: 0.2rem;
+      color: #6f8faf; text-decoration: none; font-size: 0.7rem; padding: 0.2rem 0.5rem;
+      border-radius: 30px; transition: all 0.1s; flex: 1;
+    }
+    .nav-item i { font-size: 1.2rem; color: #6f8faf; }
+    .nav-item.active { color: #0f3b5c; font-weight: 500; }
+    .nav-item.active i { color: #0f3b5c; }
+
+    /* main content – add padding bottom for fixed nav */
+    .main-content {
+      flex: 1; max-width: 1280px; margin: 0 auto; padding: 1rem 1rem 5rem;
+      width: 100%;
+    }
+
+    /* Toast container */
+    .toast-container {
+      position: fixed; top: 70px; right: 10px; z-index: 300;
+      display: flex; flex-direction: column; gap: 6px; pointer-events: none;
+    }
+    .toast {
+      background: white; border-radius: 14px; box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+      padding: 10px 14px; min-width: 240px; max-width: 280px;
+      transform: translateX(120%); transition: transform 0.25s ease;
+      display: flex; align-items: center; gap: 10px; pointer-events: auto;
+      border-left: 4px solid #2ecc71;
+    }
+    .toast.show { transform: translateX(0); }
+    .toast-icon { width: 28px; height: 28px; border-radius: 50%; background: #2ecc71; display: flex; align-items: center; justify-content: center; color: white; font-size: 0.8rem; }
+    .toast-content { flex: 1; }
+    .toast-title { font-weight: 600; color: #1e293b; margin-bottom: 2px; font-size: 0.8rem; }
+    .toast-message { color: #64748b; font-size: 0.7rem; }
+    .toast-close { color: #94a3b8; cursor: pointer; font-size: 0.8rem; }
+    .toast.error { border-left-color: #ef4444; } .toast.error .toast-icon { background: #ef4444; }
+    .toast.warning { border-left-color: #f59e0b; } .toast.warning .toast-icon { background: #f59e0b; }
+
+    /* confirmation modal */
+    .confirm-modal {
+      display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%;
+      background-color: rgba(0,0,0,0.2); backdrop-filter: blur(2px); align-items: center; justify-content: center;
+    }
+    .confirm-modal.active { display: flex; }
+    .confirm-modal-content {
+      background: white; max-width: 320px; width: 85%; padding: 1.5rem; border-radius: 32px;
+      box-shadow: 0 20px 30px rgba(0,0,0,0.15); text-align: center;
+    }
+    .confirm-modal-content i { font-size: 2rem; color: #ef4444; margin-bottom: 0.8rem; }
+    .confirm-modal-content h3 { font-size: 1.2rem; color: #1e293b; margin-bottom: 0.5rem; }
+    .confirm-modal-content p { color: #64748b; margin-bottom: 1.2rem; font-size: 0.85rem; }
+    .confirm-actions { display: flex; gap: 0.8rem; justify-content: center; }
+    .confirm-btn {
+      padding: 0.5rem 1.2rem; border: none; border-radius: 40px; font-weight: 600;
+      font-size: 0.8rem; cursor: pointer;
+    }
+    .confirm-btn.cancel { background: #f1f5f9; color: #475569; }
+    .confirm-btn.delete { background: #ef4444; color: white; }
+
+    /* loading spinner */
+    .loading-spinner { text-align: center; padding: 2rem; }
+    .spinner {
+      display: inline-block; width: 38px; height: 38px;
+      border: 3px solid #e2ecf5; border-radius: 50%;
+      border-top-color: #0f3b5c; animation: spin 0.8s ease infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* modal */
+    .modal {
+      display: none; position: fixed; z-index: 200; left: 0; top: 0; width: 100%; height: 100%;
+      background-color: rgba(0,0,0,0.2); backdrop-filter: blur(2px); align-items: center; justify-content: center;
+    }
+    .modal.active { display: flex; }
+    .modal-content {
+      background: white; max-width: 360px; width: 85%; padding: 1.5rem; border-radius: 32px;
+      box-shadow: 0 20px 30px rgba(0,0,0,0.15); position: relative; max-height: 80vh; overflow-y: auto;
+    }
+    .modal-content h3 { font-size: 1.3rem; color: #0f3b5c; margin-bottom: 1rem; display: flex; align-items: center; gap: 8px; }
+    .close-modal {
+      position: absolute; top: 1rem; right: 1.2rem; font-size: 1.6rem; cursor: pointer; color: #8b9bb0;
+    }
+
+    /* help modal specific */
+    #contactModal .modal-content p { margin: 0.6rem 0; display: flex; align-items: center; gap: 0.6rem; font-size: 0.9rem; }
+
+    /* main container */
+    .container { max-width: 1280px; margin: 0 auto; padding: 0; width: 100%; }
+
+    /* profile header */
+    .profile-header { margin-bottom: 1rem; }
+    .profile-header h1 {
+      font-size: 1.5rem; color: #0f2c40; display: flex; align-items: center; gap: 0.6rem;
+    }
+    .profile-header h1 i { color: #0f3b5c; background: #e1effa; padding: 0.6rem; border-radius: 50%; font-size: 1.2rem; }
+
+    /* main profile card */
+    .profile-card {
+      background: white; border-radius: 28px; box-shadow: 0 4px 12px rgba(0,0,0,0.02);
+      border: 1px solid #eef2f6; overflow: hidden; margin-bottom: 1.2rem;
+    }
+
+    /* cover photo */
+    .cover-photo {
+      height: 100px; background: linear-gradient(135deg, #0f3b5c 0%, #2c6b9e 100%);
+      background-image: url('https://images.unsplash.com/photo-1557683311-eac922347aa1?w=1200&auto=format');
+      background-size: cover; background-position: center; position: relative;
+    }
+
+    /* avatar section - mobile centered */
+    .profile-avatar-section {
+      display: flex; flex-direction: column; align-items: center; padding: 0 1rem 1rem;
+      position: relative;
+    }
+    .avatar-container { position: relative; margin-top: -40px; margin-bottom: 0.8rem; }
+    .profile-avatar {
+      width: 90px; height: 90px; border-radius: 50%; background: #e9f2fc;
+      border: 4px solid white; box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 3rem; color: #1f6eaf; overflow: hidden; cursor: pointer;
+    }
+    .profile-avatar img { width: 100%; height: 100%; object-fit: cover; }
+    .avatar-upload-overlay {
+      position: absolute; bottom: 5px; right: 5px; background: #0f3b5c; color: white;
+      width: 30px; height: 30px; border-radius: 50%; display: flex;
+      align-items: center; justify-content: center; cursor: pointer;
+      border: 3px solid white; transition: 0.15s;
+    }
+    .avatar-upload-overlay i { font-size: 0.8rem; }
+    #avatarUpload { display: none; }
+
+    .profile-title {
+      text-align: center; width: 100%;
+    }
+    .profile-title h2 { font-size: 1.3rem; color: #1e293b; margin-bottom: 0.2rem; }
+    .profile-title p { color: #64748b; display: flex; align-items: center; justify-content: center; gap: 0.4rem; font-size: 0.8rem; margin-bottom: 0.1rem; }
+    .profile-title p i { color: #0f3b5c; width: 16px; font-size: 0.75rem; }
+
+    /* content area */
+    .profile-content { padding: 0 1rem 1rem; }
+
+    /* single stat card */
+    .stats-single { max-width: 150px; margin: 0 auto 1.2rem; }
+    .stat-card {
+      background: #f8fafd; border-radius: 20px; padding: 0.8rem; text-align: center;
+      border: 1px solid #eef2f6;
+    }
+    .stat-icon {
+      width: 40px; height: 40px; background: #e1effa; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center; margin: 0 auto 0.3rem;
+      color: #0f3b5c; font-size: 1.2rem;
+    }
+    .stat-value { font-size: 1.3rem; font-weight: 700; color: #0f3b5c; }
+    .stat-label { color: #64748b; font-size: 0.7rem; }
+
+    /* cart section */
+    .cart-section { margin: 1.5rem 0; }
+    .section-title {
+      font-size: 1rem; color: #1e293b; margin-bottom: 0.8rem;
+      display: flex; align-items: center; gap: 0.4rem; border-bottom: 1px solid #eef2f6; padding-bottom: 0.4rem;
+    }
+    .section-title i { color: #0f3b5c; }
+
+    /* cart mobile view - horizontal scroll instead of full table */
+    .cart-horizontal-scroll {
+      display: flex; gap: 1rem; overflow-x: auto; padding: 0.5rem 0 1rem;
+    }
+    .cart-item-card {
+      flex: 0 0 260px; background: #f8fafd; border-radius: 20px; padding: 0.8rem;
+      border: 1px solid #eef2f6; display: flex; flex-direction: column; gap: 0.5rem;
+    }
+    .cart-item-header { display: flex; gap: 0.8rem; }
+    .cart-item-image {
+      width: 60px; height: 60px; border-radius: 12px; background-size: cover; background-position: center;
+      background-color: #e9f2fc; flex-shrink: 0;
+    }
+    .cart-item-info { flex: 1; }
+    .cart-item-name { font-weight: 600; color: #1e293b; font-size: 0.9rem; margin-bottom: 0.1rem; }
+    .cart-item-category { font-size: 0.7rem; color: #6b89a5; display: flex; align-items: center; gap: 2px; }
+    .cart-item-seller { font-size: 0.75rem; color: #0f3b5c; margin: 0.2rem 0; }
+    .cart-item-details { display: flex; justify-content: space-between; align-items: center; }
+    .cart-item-price { font-weight: 700; color: #0f3b5c; font-size: 0.95rem; }
+    .cart-item-price::after { content: ' RWF'; font-size: 0.65rem; font-weight: 400; color: #6b89a5; }
+    .cart-item-date { font-size: 0.65rem; color: #94a3b8; }
+    .cart-item-actions { display: flex; justify-content: flex-end; }
+    .cart-delete-btn {
+      background: #fee9e7; color: #c62828; border: none; padding: 4px 12px; border-radius: 30px;
+      font-size: 0.7rem; font-weight: 500; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;
+    }
+
+    .cart-summary {
+      background: #f8fafd; padding: 0.8rem 1rem; border-radius: 20px;
+      display: flex; align-items: center; justify-content: space-between; margin-top: 0.5rem;
+    }
+    .cart-total { display: flex; align-items: center; gap: 0.5rem; }
+    .cart-total-label { font-weight: 600; color: #1e3e5c; font-size: 0.8rem; }
+    .cart-total-value { font-weight: 700; color: #0f3b5c; font-size: 1rem; }
+    .cart-total-value::after { content: ' RWF'; font-size: 0.7rem; font-weight: 400; color: #6b89a5; }
+    .cart-clear-btn {
+      background: white; color: #c62828; border: 1px solid #ffcdd2; padding: 0.4rem 1rem;
+      border-radius: 40px; font-weight: 500; font-size: 0.7rem; cursor: pointer;
+    }
+
+    .cart-empty-state { text-align: center; padding: 2rem; color: #6f8faf; }
+    .cart-empty-state i { font-size: 2.5rem; color: #b5c9e0; margin-bottom: 0.5rem; }
+
+    /* edit form */
+    .edit-form {
+      background: #f8fafd; border-radius: 24px; padding: 1.2rem;
+      border: 1px solid #eef2f6; margin-bottom: 1.5rem;
+    }
+    .form-grid { display: grid; grid-template-columns: 1fr; gap: 0.8rem; }
+    .form-group { margin-bottom: 0.6rem; }
+    .form-label {
+      display: flex; align-items: center; gap: 4px; font-weight: 500; color: #1e293b;
+      margin-bottom: 0.2rem; font-size: 0.75rem;
+    }
+    .form-label i { color: #0f3b5c; width: 16px; }
+    .form-control {
+      width: 100%; padding: 0.5rem 0.8rem; border: 1.5px solid #eef2f6; border-radius: 40px;
+      font-size: 0.8rem; transition: 0.15s; background: white;
+    }
+    .form-control:focus { border-color: #0f3b5c; outline: none; }
+    textarea.form-control { border-radius: 20px; min-height: 60px; }
+
+    .form-actions {
+      display: flex; gap: 0.5rem; justify-content: stretch; margin-top: 0.8rem;
+      border-top: 1px solid #eef2f6; padding-top: 0.8rem;
+    }
+    .btn {
+      padding: 0.5rem 0.8rem; border-radius: 40px; font-weight: 600; font-size: 0.75rem;
+      cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 0.3rem; border: none; flex: 1;
+    }
+    .btn-primary { background: #0f3b5c; color: white; }
+    .btn-secondary { background: white; color: #0f3b5c; border: 1.5px solid #eef2f6; }
+    .btn-danger { background: #fee2e2; color: #dc2626; }
+
+    /* activity list */
+    .activity-list {
+      background: #f8fafd; border-radius: 20px; border: 1px solid #eef2f6; overflow: hidden;
+    }
+    .activity-item {
+      display: flex; align-items: center; gap: 0.6rem; padding: 0.6rem 0.8rem;
+      border-bottom: 1px solid #eef2f6;
+    }
+    .activity-item:last-child { border-bottom: none; }
+    .activity-icon {
+      width: 36px; height: 36px; background: #e1effa; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center; color: #0f3b5c; font-size: 0.9rem;
+    }
+    .activity-details { flex: 1; }
+    .activity-title { font-weight: 600; color: #1e293b; font-size: 0.8rem; margin-bottom: 0.1rem; }
+    .activity-time { font-size: 0.65rem; color: #94a3b8; display: flex; align-items: center; gap: 2px; }
+    .activity-status {
+      padding: 0.1rem 0.6rem; border-radius: 30px; font-size: 0.65rem;
+      background: #e3f9ee; color: #0d9488;
+    }
+
+    /* footer */
+    footer {
+      background: #0f2c40; color: #cbdae6; margin-top: 1rem;
+      padding: 1.5rem 1rem 0.8rem; border-radius: 28px 28px 0 0;
+    }
+    .footer-content { display: flex; flex-direction: column; align-items: center; gap: 0.5rem; }
+    .social-only { display: flex; gap: 1.2rem; }
+    .social-only a { font-size: 1.5rem; color: #b0c6db; }
+    .copyright { text-align: center; font-size: 0.7rem; color: #98b1c9; margin-top: 1rem; border-top: 1px solid #1f4a6e; padding-top: 0.6rem; }
+  </style>
+</head>
+<body>
+  <!-- TOP BAR -->
+  <div class="top-bar">
+    <div class="logo-area">
+      <i class="fas fa-shopping-bag logo-icon"></i>
+      <div class="logo-text">GuraNeza<span>BuySmart</span></div>
+    </div>
+    <div class="top-actions">
+      <button class="letshop-btn" onclick="window.location.href='letshop.html'" title="Let's Shop"><i class="fas fa-shopping-bag"></i></button>
+      <button class="drawer-trigger" id="drawerTrigger"><i class="fas fa-bars"></i></button>
+    </div>
+  </div>
+
+  <!-- SIDE DRAWER -->
+  <div class="drawer-overlay" id="drawerOverlay"></div>
+  <div class="drawer" id="drawer">
+    <div class="drawer-header">
+      <div class="drawer-profile-img" id="drawerProfileImg"><i class="fas fa-user-circle"></i></div>
+      <span class="drawer-profile-name" id="drawerProfileName">Guest</span>
+    </div>
+    <div class="drawer-item" id="drawerCart">
+      <i class="fas fa-shopping-basket"></i> My Cart <span class="drawer-cart-badge" id="drawerCartCount">0</span>
+    </div>
+    <div class="drawer-item" id="drawerProfile">
+      <i class="fas fa-user"></i> Profile
+    </div>
+    <div class="drawer-item" id="drawerHelp">
+      <i class="fas fa-question-circle"></i> Help Center
+    </div>
+    <div class="drawer-divider"></div>
+    <div class="drawer-item" id="drawerLogout">
+      <i class="fas fa-sign-out-alt"></i> Logout
+    </div>
+    <div class="drawer-divider"></div>
+    <div class="drawer-item lang-option" data-lang="en">
+      <i class="fas fa-language"></i> English
+    </div>
+    <div class="drawer-item lang-option" data-lang="rw">
+      <i class="fas fa-language"></i> Kinyarwanda
+    </div>
+    <div class="close-drawer" id="closeDrawerBtn"><i class="fas fa-times"></i></div>
+  </div>
+
+  <!-- BOTTOM NAV -->
+  <div class="bottom-nav">
+    <a href="home.html" class="nav-item" data-nav="home"><i class="fas fa-home"></i><span>Home</span></a>
+    <a href="buy.html" class="nav-item" data-nav="buy"><i class="fas fa-shopping-cart"></i><span>Buy</span></a>
+    <a href="sell.html" class="nav-item" data-nav="sell"><i class="fas fa-plus-circle"></i><span>Sell</span></a>
+    <a href="shops.html" class="nav-item" data-nav="shops"><i class="fas fa-store"></i><span>Shops</span></a>
+  </div>
+
+  <!-- toast container -->
+  <div id="toastContainer" class="toast-container"></div>
+
+  <!-- confirmation modal -->
+  <div id="confirmModal" class="confirm-modal">
+    <div class="confirm-modal-content">
+      <i class="fas fa-exclamation-triangle"></i>
+      <h3 id="confirmTitle">Confirm Action</h3>
+      <p id="confirmMessage">Are you sure?</p>
+      <div class="confirm-actions">
+        <button class="confirm-btn cancel" id="confirmCancelBtn">Cancel</button>
+        <button class="confirm-btn delete" id="confirmActionBtn">Confirm</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- loading spinner -->
+  <div id="loadingSpinner" class="loading-spinner" style="display: none;"><div class="spinner"></div><p style="margin-top:0.5rem;">Loading...</p></div>
+
+  <!-- help modal -->
+  <div id="contactModal" class="modal">
+    <div class="modal-content">
+      <span class="close-modal" id="closeModalBtn">&times;</span>
+      <h3><i class="fas fa-question-circle"></i> Help Center</h3>
+      <p><i class="fas fa-envelope"></i> <a href="mailto:guraneza@gmail.com">guraneza@gmail.com</a></p>
+      <p><i class="fas fa-phone-alt"></i> +250 795583674</p>
+      <p><i class="fas fa-life-ring"></i> <a href="#" id="modalHelpCenter">FAQ</a></p>
+    </div>
+  </div>
+
+  <main class="main-content">
+    <div class="container">
+      <div class="profile-header">
+        <h1><i class="fas fa-user-circle"></i> My Profile</h1>
+      </div>
+
+      <div class="profile-card">
+        <div class="cover-photo"></div>
+
+        <div class="profile-avatar-section">
+          <div class="avatar-container">
+            <div class="profile-avatar" id="profileAvatar" onclick="document.getElementById('avatarUpload').click()">
+              <img id="avatarImage" src="" alt="" style="display: none;">
+              <i class="fas fa-user-circle" id="avatarIcon"></i>
+            </div>
+            <div class="avatar-upload-overlay" onclick="document.getElementById('avatarUpload').click()">
+              <i class="fas fa-camera"></i>
+            </div>
+            <input type="file" id="avatarUpload" accept="image/*">
+          </div>
+          <div class="profile-title">
+            <h2 id="displayUsername">Loading...</h2>
+            <p><i class="fas fa-envelope"></i> <span id="displayEmail">Loading...</span></p>
+            <p><i class="fas fa-phone"></i> <span id="displayPhone">Loading...</span></p>
+            <p><i class="fas fa-map-marker-alt"></i> <span id="displayLocation">Loading...</span></p>
+            <p><i class="fas fa-calendar-alt"></i> Joined <span id="displayJoinDate">Loading...</span></p>
+          </div>
+        </div>
+
+        <div class="profile-content">
+          <!-- single stat: products listed -->
+          <div class="stats-single">
+            <div class="stat-card">
+              <div class="stat-icon"><i class="fas fa-shopping-bag"></i></div>
+              <div class="stat-value" id="statProducts">0</div>
+              <div class="stat-label">Products Listed</div>
+            </div>
+          </div>
+
+          <!-- cart section -->
+          <div class="cart-section">
+            <h3 class="section-title"><i class="fas fa-shopping-cart"></i> My Cart (<span id="cartItemCount">0</span> items)</h3>
+            <div id="cartContainer"></div>
+          </div>
+
+          <!-- edit profile form -->
+          <h3 class="section-title"><i class="fas fa-edit"></i> Edit Profile</h3>
+          <form id="profileForm" class="edit-form">
+            <div class="form-grid">
+              <div class="form-group"><label class="form-label"><i class="fas fa-user"></i> Display Name</label><input type="text" class="form-control" id="displayName" placeholder="Enter name"></div>
+              <div class="form-group"><label class="form-label"><i class="fas fa-envelope"></i> Email</label><input type="email" class="form-control" id="email" readonly disabled></div>
+              <div class="form-group"><label class="form-label"><i class="fas fa-phone"></i> Phone</label><input type="tel" class="form-control" id="phone" placeholder="Phone number"></div>
+              <div class="form-group"><label class="form-label"><i class="fas fa-map-marker-alt"></i> Location</label><input type="text" class="form-control" id="location" placeholder="City"></div>
+              <div class="form-group full-width"><label class="form-label"><i class="fas fa-store"></i> Bio</label><textarea class="form-control" id="bio" rows="2" placeholder="Tell us about yourself..."></textarea></div>
+            </div>
+            <div class="form-actions">
+              <button type="button" class="btn btn-secondary" onclick="resetForm()" id="resetBtn"><i class="fas fa-undo"></i> Reset</button>
+              <button type="button" class="btn btn-danger" onclick="deleteAccount()" id="deleteBtn"><i class="fas fa-trash"></i> Delete</button>
+              <button type="submit" class="btn btn-primary" id="saveBtn"><i class="fas fa-save"></i> Save</button>
+            </div>
+          </form>
+
+          <!-- recent activity -->
+          <h3 class="section-title"><i class="fas fa-history"></i> Recent Activity</h3>
+          <div class="activity-list" id="activityList">
+            <div class="activity-item"><div class="activity-icon"><i class="fas fa-shopping-bag"></i></div><div class="activity-details"><div class="activity-title">No recent activity</div><div class="activity-time">Start exploring</div></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <div class="footer-content"><div class="footer-brand"><p>© 2026 GuraNeza | BuySmart</p></div><div class="social-only"><a href="#"><i class="fab fa-tiktok"></i></a><a href="#"><i class="fab fa-youtube"></i></a><a href="#"><i class="fab fa-instagram"></i></a><a href="#"><i class="fab fa-twitter"></i></a></div></div>
+    <div class="copyright"><span>Buy Smart, Sell Easy: @guraneza</span></div>
+  </footer>
+
+  <!-- Firebase SDK (modular) - all functionality unchanged -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getDatabase, ref, set, get, update, remove } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+    import { getAuth, onAuthStateChanged, signOut, updateProfile, deleteUser } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyAr6-rTa8yQCxr41JjWysFLHeFxH0C2IMI",
+      authDomain: "guraneza-714f7.firebaseapp.com",
+      databaseURL: "https://guraneza-714f7-default-rtdb.firebaseio.com",
+      projectId: "guraneza-714f7",
+      storageBucket: "guraneza-714f7.firebasestorage.app",
+      messagingSenderId: "457107620336",
+      appId: "1:457107620336:web:1583db305b03528fcf5d35"
+    };
+    const app = initializeApp(firebaseConfig);
+    const database = getDatabase(app);
+    const auth = getAuth(app);
+
+    // --- globals ---
+    let currentUser = null, userProfile = null, cartItems = [];
+    
+    // drawer elements
+    const drawer = document.getElementById('drawer');
+    const overlay = document.getElementById('drawerOverlay');
+    const drawerTrigger = document.getElementById('drawerTrigger');
+    const closeDrawer = document.getElementById('closeDrawerBtn');
+    const drawerProfileImg = document.getElementById('drawerProfileImg');
+    const drawerProfileName = document.getElementById('drawerProfileName');
+    const drawerCartCount = document.getElementById('drawerCartCount');
+    const drawerCart = document.getElementById('drawerCart');
+    const drawerProfile = document.getElementById('drawerProfile');
+    const drawerHelp = document.getElementById('drawerHelp');
+    const drawerLogout = document.getElementById('drawerLogout');
+
+    const loadingSpinner = document.getElementById('loadingSpinner');
+
+    function showToast(message, type='success', duration=3000) {
+      const container = document.getElementById('toastContainer');
+      const toast = document.createElement('div'); toast.className = `toast ${type}`;
+      const icons = { success:'fa-check-circle', error:'fa-exclamation-circle', warning:'fa-exclamation-triangle' };
+      const titles = { success:'Success!', error:'Error!', warning:'Warning!' };
+      toast.innerHTML = `<div class="toast-icon"><i class="fas ${icons[type]}"></i></div><div class="toast-content"><div class="toast-title">${titles[type]}</div><div class="toast-message">${message}</div></div><div class="toast-close" onclick="this.parentElement.remove()"><i class="fas fa-times"></i></div>`;
+      container.appendChild(toast); setTimeout(()=>toast.classList.add('show'),10); setTimeout(()=>{ toast.classList.remove('show'); setTimeout(()=>toast.remove(),300); },duration);
+    }
+
+    function showConfirmation(title, message) {
+      return new Promise((resolve) => {
+        const modal = document.getElementById('confirmModal');
+        document.getElementById('confirmTitle').textContent = title;
+        document.getElementById('confirmMessage').textContent = message;
+        const confirmBtn = document.getElementById('confirmActionBtn'), cancelBtn = document.getElementById('confirmCancelBtn');
+        const closeModal = () => { modal.classList.remove('active'); confirmBtn.removeEventListener('click',confirmHandler); cancelBtn.removeEventListener('click',cancelHandler); };
+        const confirmHandler = () => { closeModal(); resolve(true); };
+        const cancelHandler = () => { closeModal(); resolve(false); };
+        confirmBtn.addEventListener('click', confirmHandler); cancelBtn.addEventListener('click', cancelHandler);
+        modal.classList.add('active');
+      });
+    }
+
+    function setLoading(isLoading) {
+      const saveBtn = document.getElementById('saveBtn'), resetBtn = document.getElementById('resetBtn'), deleteBtn = document.getElementById('deleteBtn');
+      loadingSpinner.style.display = isLoading ? 'block' : 'none';
+      if(saveBtn) saveBtn.disabled = isLoading; if(resetBtn) resetBtn.disabled = isLoading; if(deleteBtn) deleteBtn.disabled = isLoading;
+    }
+
+    function updateNavProfile() {
+      if(currentUser && userProfile) {
+        drawerProfileName.textContent = userProfile.displayName || currentUser.email?.split('@')[0] || 'User';
+        if(userProfile.profileImage) drawerProfileImg.innerHTML = `<img src="${userProfile.profileImage}" alt="">`; else drawerProfileImg.innerHTML = '<i class="fas fa-user-circle"></i>';
+      } else { 
+        drawerProfileName.textContent = 'Guest'; 
+        drawerProfileImg.innerHTML = '<i class="fas fa-user-circle"></i>'; 
+      }
+    }
+
+    async function updateCartCount() {
+      if(!currentUser) { drawerCartCount.textContent='0'; document.getElementById('cartItemCount').textContent='0'; return; }
+      try {
+        const snap = await get(ref(database, `carts/${currentUser.uid}`));
+        if(snap.exists()) { cartItems = Object.entries(snap.val()).map(([k,v])=>({firebaseKey:k, ...v})); drawerCartCount.textContent=cartItems.length; document.getElementById('cartItemCount').textContent=cartItems.length; }
+        else { cartItems=[]; drawerCartCount.textContent='0'; document.getElementById('cartItemCount').textContent='0'; }
+      } catch { drawerCartCount.textContent='0'; document.getElementById('cartItemCount').textContent='0'; cartItems=[]; }
+    }
+
+    async function loadUserProfile() {
+      if(!currentUser) return; setLoading(true);
+      try {
+        const snap = await get(ref(database, `users/${currentUser.uid}`));
+        if(snap.exists()) userProfile = snap.val();
+        else { 
+          userProfile = { uid:currentUser.uid, email:currentUser.email, displayName:currentUser.displayName||currentUser.email?.split('@')[0]||'User', phone:'', location:'', bio:'', profileImage:'', joinDate:new Date().toISOString(), stats:{productsListed:0} }; 
+          await set(ref(database, `users/${currentUser.uid}`), userProfile); 
+        }
+        renderUserProfile(); calculateProductsListed(); await updateCartCount(); renderCart(); loadRecentActivity();
+        updateNavProfile();
+      } catch(e) { showToast('Error loading profile','error'); } finally { setLoading(false); }
+    }
+
+    function renderUserProfile() {
+      if(!userProfile) return;
+      document.getElementById('displayUsername').textContent = userProfile.displayName||'User';
+      document.getElementById('displayEmail').textContent = userProfile.email||'No email';
+      document.getElementById('displayPhone').textContent = userProfile.phone||'Not provided';
+      document.getElementById('displayLocation').textContent = userProfile.location||'Not provided';
+      document.getElementById('displayJoinDate').textContent = userProfile.joinDate ? new Date(userProfile.joinDate).toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'}) : 'Unknown';
+      document.getElementById('displayName').value = userProfile.displayName||'';
+      document.getElementById('email').value = userProfile.email||'';
+      document.getElementById('phone').value = userProfile.phone||'';
+      document.getElementById('location').value = userProfile.location||'';
+      document.getElementById('bio').value = userProfile.bio||'';
+      if(userProfile.profileImage) { document.getElementById('avatarImage').src=userProfile.profileImage; document.getElementById('avatarImage').style.display='block'; document.getElementById('avatarIcon').style.display='none'; }
+      else { document.getElementById('avatarImage').style.display='none'; document.getElementById('avatarIcon').style.display='block'; }
+    }
+
+    async function calculateProductsListed() {
+      try {
+        const snap = await get(ref(database,'products'));
+        if(snap.exists()) { let cnt = Object.values(snap.val()).filter(p=> p.shopId?.includes(currentUser?.uid)||p.postedBy===currentUser?.uid||p.postedByEmail===currentUser?.email).length; document.getElementById('statProducts').textContent = cnt; }
+      } catch(e) { console.error(e); }
+    }
+
+    function renderCart() {
+      const cartContainer = document.getElementById('cartContainer');
+      if(!cartItems.length) { cartContainer.innerHTML = `<div class="cart-empty-state"><i class="fas fa-shopping-cart"></i><h3>Your cart is empty</h3><p>Start shopping</p></div>`; return; }
+      const total = cartItems.reduce((sum,item)=> sum+(item.price||0),0);
+      let html = `<div class="cart-horizontal-scroll">`;
+      cartItems.forEach(item=>{
+        let img = 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400&auto=format';
+        if(item.images?.length) img=item.images[0];
+        else if(item.images && typeof item.images==='object') { let f = Object.values(item.images)[0]; if(f) img=f; }
+        else if(item.image1) img=item.image1;
+        html += `<div class="cart-item-card" data-cart-key="${item.firebaseKey}">
+          <div class="cart-item-header">
+            <div class="cart-item-image" style="background-image:url('${img}')"></div>
+            <div class="cart-item-info">
+              <div class="cart-item-name">${item.name}</div>
+              <div class="cart-item-category"><i class="fas fa-folder"></i> ${item.category||'Uncategorized'}</div>
+              <div class="cart-item-seller"><i class="fas fa-store"></i> ${item.shopName||'Unknown'}</div>
+            </div>
+          </div>
+          <div class="cart-item-details">
+            <span class="cart-item-price">${Number(item.price).toLocaleString()}</span>
+            <span class="cart-item-date"><i class="far fa-clock"></i> ${new Date(item.addedAt).toLocaleDateString()}</span>
+          </div>
+          <div class="cart-item-actions">
+            <button class="cart-delete-btn" onclick="window.removeFromCart('${item.firebaseKey}')"><i class="fas fa-trash"></i> Remove</button>
+          </div>
+        </div>`;
+      });
+      html += `</div><div class="cart-summary"><div class="cart-total"><span class="cart-total-label">Total:</span><span class="cart-total-value">${total.toLocaleString()}</span></div><button class="cart-clear-btn" onclick="window.clearCart()"><i class="fas fa-trash-alt"></i> Clear</button></div>`;
+      cartContainer.innerHTML = html;
+    }
+
+    window.removeFromCart = async function(key) {
+      if(!currentUser) return; if(!await showConfirmation('Remove Item','Remove from cart?')) return; setLoading(true);
+      try { await remove(ref(database, `carts/${currentUser.uid}/${key}`)); cartItems = cartItems.filter(i=>i.firebaseKey!==key); await updateCartCount(); renderCart(); loadRecentActivity(); showToast('Item removed'); } catch(e){ showToast('Error','error'); } finally { setLoading(false); }
+    };
+    window.clearCart = async function() {
+      if(!currentUser||!cartItems.length) return; if(!await showConfirmation('Clear Cart','Remove all items?')) return; setLoading(true);
+      try { await remove(ref(database, `carts/${currentUser.uid}`)); cartItems=[]; await updateCartCount(); renderCart(); loadRecentActivity(); showToast('Cart cleared'); } catch(e){ showToast('Error','error'); } finally { setLoading(false); }
+    };
+
+    function loadRecentActivity() {
+      const act = document.getElementById('activityList'); let html = '';
+      cartItems.sort((a,b)=>new Date(b.addedAt)-new Date(a.addedAt)).slice(0,3).forEach(item=>{ html+=`<div class="activity-item"><div class="activity-icon"><i class="fas fa-shopping-cart"></i></div><div class="activity-details"><div class="activity-title">Added "${item.name}" to cart</div><div class="activity-time"><i class="far fa-clock"></i> ${new Date(item.addedAt).toLocaleString()}</div></div><div class="activity-status">In cart</div></div>`; });
+      act.innerHTML = html || `<div class="activity-item"><div class="activity-icon"><i class="fas fa-shopping-bag"></i></div><div class="activity-details"><div class="activity-title">No recent activity</div><div class="activity-time">Start exploring</div></div></div>`;
+    }
+
+    async function handleAvatarUpload(e) {
+      const file = e.target.files[0]; if(!file||!currentUser) return;
+      const reader = new FileReader(); reader.onload = async function(ev) {
+        setLoading(true);
+        try { await update(ref(database, `users/${currentUser.uid}`), {profileImage:ev.target.result}); userProfile.profileImage=ev.target.result; document.getElementById('avatarImage').src=ev.target.result; document.getElementById('avatarImage').style.display='block'; document.getElementById('avatarIcon').style.display='none'; updateNavProfile(); showToast('Profile picture updated!'); } catch(err){ showToast('Error','error'); } finally { setLoading(false); }
+      }; reader.readAsDataURL(file);
+    }
+
+    async function saveProfileChanges(e) {
+      e.preventDefault(); if(!currentUser) return;
+      const displayName = document.getElementById('displayName').value.trim(), phone = document.getElementById('phone').value.trim(), location = document.getElementById('location').value.trim(), bio = document.getElementById('bio').value.trim();
+      if(!displayName) { showToast('Display name required','error'); return; }
+      setLoading(true);
+      try { 
+        await updateProfile(currentUser, {displayName}); 
+        await update(ref(database, `users/${currentUser.uid}`), {displayName, phone, location, bio}); 
+        userProfile = {...userProfile, displayName, phone, location, bio}; 
+        document.getElementById('displayUsername').textContent=displayName; 
+        document.getElementById('displayPhone').textContent=phone||'Not provided'; 
+        document.getElementById('displayLocation').textContent=location||'Not provided'; 
+        updateNavProfile(); showToast('Profile updated'); 
+      } catch(err){ showToast('Error','error'); } finally { setLoading(false); }
+    }
+
+    window.resetForm = function() { renderUserProfile(); };
+    window.deleteAccount = async function() {
+      if(!await showConfirmation('Delete Account','This action is permanent!')) return; setLoading(true);
+      try { 
+        await remove(ref(database, `carts/${currentUser.uid}`)); 
+        await remove(ref(database, `users/${currentUser.uid}`)); 
+        await deleteUser(currentUser); 
+        showToast('Account deleted'); 
+        setTimeout(()=>window.location.href='index.html',1500); 
+      } catch(err){ showToast('Error','error'); setLoading(false); }
+    };
+
+    // --- auth ---
+    onAuthStateChanged(auth, (user) => {
+      if(!user) { window.location.href='index.html'; return; }
+      currentUser = user; updateNavProfile(); loadUserProfile();
+    });
+
+    // --- drawer controls ---
+    if(drawerTrigger) {
+      drawerTrigger.addEventListener('click', () => {
+        drawer.classList.add('active');
+        overlay.classList.add('active');
+      });
+    }
+    function closeDrawerFn() {
+      drawer.classList.remove('active');
+      overlay.classList.remove('active');
+    }
+    if(overlay) overlay.addEventListener('click', closeDrawerFn);
+    if(closeDrawer) closeDrawer.addEventListener('click', closeDrawerFn);
+
+    if(drawerCart) {
+      drawerCart.addEventListener('click', () => { window.location.href = 'profile.html'; });
+    }
+    if(drawerProfile) {
+      drawerProfile.addEventListener('click', () => { window.location.href = 'profile.html'; });
+    }
+    if(drawerHelp) {
+      drawerHelp.addEventListener('click', () => { document.getElementById('contactModal').classList.add('active'); closeDrawerFn(); });
+    }
+    if(drawerLogout) {
+      drawerLogout.addEventListener('click', async () => { await signOut(auth); showToast('Logged out', 'success'); closeDrawerFn(); setTimeout(() => window.location.href = 'index.html', 1000); });
+    }
+
+    document.getElementById('profileForm').addEventListener('submit', saveProfileChanges);
+    document.getElementById('avatarUpload').addEventListener('change', handleAvatarUpload);
+
+    document.addEventListener('DOMContentLoaded', ()=>{
+      const modal = document.getElementById('contactModal');
+      document.getElementById('helpCenterLink')?.addEventListener('click', (e)=>{ e.preventDefault(); modal.classList.add('active'); });
+      document.getElementById('closeModalBtn')?.addEventListener('click', ()=> modal.classList.remove('active'));
+      window.addEventListener('click', e=>{ if(e.target===modal) modal.classList.remove('active'); });
+      document.getElementById('modalHelpCenter')?.addEventListener('click', (e)=>{ e.preventDefault(); showToast('FAQ coming soon','warning'); });
+
+      const langOpts = document.querySelectorAll('.lang-option');
+      function setLanguage(l) { localStorage.setItem('guraneza_lang',l); langOpts.forEach(o=>o.classList.toggle('active',o.dataset.lang===l)); }
+      setLanguage(localStorage.getItem('guraneza_lang')||'en');
+      langOpts.forEach(o=>o.addEventListener('click',()=> setLanguage(o.dataset.lang)));
+    });
+  </script>
+</body>
+</html>

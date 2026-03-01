@@ -1,0 +1,1440 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+  <title>GuraNeza · Product & Chat – fixed</title>
+  <!-- Font Awesome 6 -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <!-- Google Fonts: Inter -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+    body { background: #f5f7fa; color: #131b2c; line-height: 1.5; min-height: 100vh; display: flex; flex-direction: column; }
+
+    /* === TOP BAR (logo, let's shop, drawer trigger) === */
+    .top-bar {
+      position: sticky; top: 0; z-index: 150;
+      background: rgba(255,255,255,0.92); backdrop-filter: blur(12px);
+      border-bottom: 1px solid rgba(0,0,0,0.02);
+      padding: 0.5rem 1rem;
+      display: flex; align-items: center; justify-content: space-between;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.02);
+    }
+    .logo-area { display: flex; align-items: center; gap: 0.3rem; }
+    .logo-icon { font-size: 1.6rem; color: #0f3b5c; }
+    .logo-text { font-weight: 700; font-size: 1.2rem; color: #131b2c; }
+    .logo-text span { color: #0f3b5c; background: #e1effa; padding: 0.15rem 0.4rem; border-radius: 30px; font-size: 0.7rem; margin-left: 0.2rem; }
+
+    .top-actions { display: flex; align-items: center; gap: 0.5rem; }
+    .letshop-btn {
+      width: 38px; height: 38px; border-radius: 50%; border: none;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.1rem; background: #ecf2f8; color: #0f3b5c; border: 1px solid #dae2ec;
+      cursor: pointer;
+    }
+    .drawer-trigger {
+      width: 38px; height: 38px; border-radius: 50%; border: none;
+      background: #0f3b5c; color: white; font-size: 1.2rem;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; box-shadow: 0 4px 8px rgba(15,59,92,0.15);
+    }
+
+    /* === SIDE DRAWER (cart, profile, options, logout, lang) === */
+    .drawer-overlay {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background-color: rgba(0,0,0,0.2); backdrop-filter: blur(3px);
+      z-index: 200; visibility: hidden; opacity: 0;
+      transition: opacity 0.2s ease, visibility 0.2s;
+    }
+    .drawer-overlay.active { visibility: visible; opacity: 1; }
+    .drawer {
+      position: fixed; top: 0; right: -280px; width: 260px; height: 100%;
+      background: white; box-shadow: -4px 0 20px rgba(0,0,0,0.1);
+      z-index: 250; padding: 1.5rem 1rem; transition: right 0.25s ease;
+      display: flex; flex-direction: column;
+    }
+    .drawer.active { right: 0; }
+    .drawer-header {
+      display: flex; align-items: center; gap: 0.8rem; margin-bottom: 1.8rem;
+      border-bottom: 1px solid #ecf2f8; padding-bottom: 1rem;
+    }
+    .drawer-profile-img {
+      width: 48px; height: 48px; border-radius: 50%; background: #e1effa;
+      display: flex; align-items: center; justify-content: center;
+      color: #0f3b5c; font-size: 1.6rem; border: 2px solid white;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.05); overflow: hidden;
+    }
+    .drawer-profile-img img { width: 100%; height: 100%; object-fit: cover; }
+    .drawer-profile-name { font-weight: 600; color: #1e3e5c; font-size: 0.95rem; }
+    .drawer-item {
+      display: flex; align-items: center; gap: 1rem; padding: 0.8rem 0.5rem;
+      color: #1e2a3a; text-decoration: none; font-size: 0.9rem; border-radius: 12px;
+      transition: background 0.1s; cursor: pointer;
+    }
+    .drawer-item i { width: 24px; color: #0f3b5c; font-size: 1.1rem; }
+    .drawer-item:hover { background: #f0f8ff; }
+    .drawer-divider { height: 1px; background: #ecf2f8; margin: 0.8rem 0; }
+    .drawer-cart-badge {
+      background: #0f3b5c; color: white; border-radius: 30px;
+      padding: 0.15rem 0.5rem; font-size: 0.7rem; margin-left: auto;
+    }
+    .close-drawer {
+      position: absolute; top: 1rem; left: 1rem; font-size: 1.4rem;
+      color: #8b9bb0; cursor: pointer;
+    }
+
+    /* === BOTTOM NAV (home, buy, sell, shops) === */
+    .bottom-nav {
+      position: fixed; bottom: 0; left: 0; width: 100%; z-index: 100;
+      background: rgba(255,255,255,0.92); backdrop-filter: blur(12px);
+      border-top: 1px solid #e6ecf3; display: flex; justify-content: space-around;
+      padding: 0.4rem 0.5rem; box-shadow: 0 -4px 10px rgba(0,0,0,0.02);
+    }
+    .nav-item {
+      display: flex; flex-direction: column; align-items: center; gap: 0.2rem;
+      color: #6f8faf; text-decoration: none; font-size: 0.7rem; padding: 0.2rem 0.5rem;
+      border-radius: 30px; transition: all 0.1s; flex: 1;
+    }
+    .nav-item i { font-size: 1.2rem; color: #6f8faf; }
+    .nav-item.active { color: #0f3b5c; font-weight: 500; }
+    .nav-item.active i { color: #0f3b5c; }
+
+    /* main content – add padding bottom for fixed nav */
+    .main-content {
+      flex: 1; max-width: 1280px; margin: 0 auto; padding: 1rem 1rem 5rem;
+      width: 100%;
+    }
+
+    /* Toast container */
+    .toast-container {
+      position: fixed; top: 70px; right: 10px; z-index: 300;
+      display: flex; flex-direction: column; gap: 6px; pointer-events: none;
+    }
+    .toast {
+      background: white; border-radius: 14px; box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+      padding: 10px 14px; min-width: 240px; max-width: 280px;
+      transform: translateX(120%); transition: transform 0.25s ease;
+      display: flex; align-items: center; gap: 10px; pointer-events: auto;
+      border-left: 4px solid #2ecc71;
+    }
+    .toast.show { transform: translateX(0); }
+    .toast-icon { width: 28px; height: 28px; border-radius: 50%; background: #2ecc71; display: flex; align-items: center; justify-content: center; color: white; font-size: 0.8rem; }
+    .toast-content { flex: 1; }
+    .toast-title { font-weight: 600; color: #1e293b; margin-bottom: 2px; font-size: 0.8rem; }
+    .toast-message { color: #64748b; font-size: 0.7rem; }
+    .toast-close { color: #94a3b8; cursor: pointer; font-size: 0.8rem; }
+    .toast.error { border-left-color: #ef4444; } .toast.error .toast-icon { background: #ef4444; }
+    .toast.warning { border-left-color: #f59e0b; } .toast.warning .toast-icon { background: #f59e0b; }
+
+    /* modal */
+    .modal {
+      display: none; position: fixed; z-index: 400; left: 0; top: 0; width: 100%; height: 100%;
+      background-color: rgba(0,0,0,0.2); backdrop-filter: blur(2px); align-items: center; justify-content: center;
+    }
+    .modal.active { display: flex; }
+    .modal-content {
+      background: white; max-width: 340px; width: 85%; padding: 1.5rem; border-radius: 32px;
+      box-shadow: 0 20px 30px rgba(0,0,0,0.15); position: relative;
+    }
+    .modal-content h3 { font-size: 1.4rem; color: #0f3b5c; margin-bottom: 1rem; display: flex; gap: 6px; }
+    .modal-content p { margin: 0.6rem 0; display: flex; align-items: center; gap: 0.6rem; }
+    .modal-content i { width: 1.8rem; color: #0f3b5c; }
+    .close-modal { position: absolute; top: 0.8rem; right: 1rem; font-size: 1.6rem; cursor: pointer; color: #8b9bb0; }
+
+    /* image viewer */
+    .image-viewer-modal {
+      display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%;
+      background-color: rgba(0,0,0,0.95); align-items: center; justify-content: center;
+    }
+    .image-viewer-modal.active { display: flex; }
+    .image-viewer-content { position: relative; width: 90%; height: 90%; display: flex; align-items: center; justify-content: center; }
+    .image-viewer-close {
+      position: absolute; top: 20px; right: 30px; color: white; font-size: 2.5rem; cursor: pointer;
+      width: 50px; height: 50px; background: rgba(255,255,255,0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center;
+      z-index: 1001;
+    }
+    .image-viewer-nav {
+      position: absolute; top: 50%; transform: translateY(-50%);
+      width: 48px; height: 48px; background: rgba(255,255,255,0.2); border: none; border-radius: 50%;
+      color: white; font-size: 1.8rem; cursor: pointer; display: flex; align-items: center; justify-content: center;
+      z-index: 1001;
+    }
+    .image-viewer-nav.prev { left: 20px; }
+    .image-viewer-nav.next { right: 20px; }
+    .image-viewer-main { max-width: 90%; max-height: 90%; object-fit: contain; border-radius: 8px; }
+    .image-viewer-counter {
+      position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%);
+      color: white; background: rgba(0,0,0,0.5); padding: 0.4rem 1.2rem; border-radius: 50px; font-size: 0.9rem;
+    }
+
+    /* product + chat layout - mobile stacked */
+    .product-chat-stack {
+      display: flex; flex-direction: column; gap: 1.5rem;
+    }
+
+    /* product panel */
+    .product-panel {
+      background: white; border-radius: 28px; box-shadow: 0 6px 16px rgba(0,0,0,0.03);
+      border: 1px solid #eef2f6; padding: 1.2rem; width: 100%;
+    }
+    .product-images-section { margin-bottom: 1.5rem; }
+    .main-image-container {
+      width: 100%; height: 250px; border-radius: 20px; overflow: hidden;
+      border: 1px solid #e2ecf5; background: #f8fafd; margin-bottom: 1rem;
+      cursor: pointer; transition: 0.2s; box-shadow: 0 4px 12px rgba(0,0,0,0.02);
+    }
+    .main-image { width: 100%; height: 100%; background-size: contain; background-position: center; background-repeat: no-repeat; background-color: #f8fafd; }
+    .image-thumbnails { display: flex; gap: 0.7rem; overflow-x: auto; padding: 0.3rem 0; }
+    .image-thumbnail {
+      width: 60px; height: 60px; border-radius: 12px; background-size: cover; background-position: center;
+      cursor: pointer; border: 2px solid transparent; transition: 0.15s; flex-shrink: 0;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+    }
+    .image-thumbnail:hover { border-color: #0f3b5c; }
+    .image-thumbnail.active { border-color: #0f3b5c; box-shadow: 0 0 0 3px rgba(15,59,92,0.15); }
+    .no-images { height: 250px; border-radius: 20px; background: #f8fafd; display: flex; align-items: center; justify-content: center; color: #8aa9c9; border: 2px dashed #e2ecf5; }
+
+    .product-title { font-size: 1.5rem; font-weight: 700; color: #0f2c40; margin-bottom: 0.8rem; line-height: 1.3; }
+    .product-badges { display: flex; gap: 0.5rem; margin-bottom: 1rem; flex-wrap: wrap; }
+    .badge {
+      padding: 0.3rem 0.8rem; border-radius: 50px; font-size: 0.7rem; font-weight: 600;
+      display: inline-flex; align-items: center; gap: 0.3rem;
+    }
+    .badge.verified { background: #e3f5e3; color: #1e7e34; }
+    .badge.negotiable { background: #e8f3e8; color: #2e7d32; }
+    .badge.shop { background: #e1effa; color: #0f3b5c; cursor: pointer; }
+    .badge.individual { background: #f0f0f0; color: #4a5b6b; }
+    .product-price { font-size: 1.8rem; font-weight: 700; color: #0f3b5c; margin-bottom: 0.8rem; }
+    .product-price::after { content: ' RWF'; font-size: 0.9rem; font-weight: 500; color: #6b89a5; margin-left: 0.2rem; }
+    .product-category { display: flex; align-items: center; gap: 0.5rem; color: #64748b; margin-bottom: 1rem; font-size: 0.8rem; }
+    .add-to-cart-large {
+      background: #0f3b5c; color: white; border: none; padding: 0.8rem 1.2rem; border-radius: 60px;
+      font-size: 0.9rem; font-weight: 600; display: flex; align-items: center; justify-content: center;
+      gap: 0.5rem; cursor: pointer; transition: 0.2s; width: 100%; margin-bottom: 1.2rem;
+    }
+    .product-description {
+      color: #1e293b; line-height: 1.7; margin-bottom: 1.5rem; padding: 1rem;
+      background: #f8fafd; border-radius: 16px; border: 1px solid #e2ecf5; font-size: 0.85rem;
+    }
+    .seller-info {
+      background: #f8fafd; border-radius: 16px; padding: 1rem; border: 1px solid #e2ecf5;
+    }
+    .seller-info h3 { display: flex; align-items: center; gap: 0.5rem; color: #0f3b5c; margin-bottom: 0.8rem; font-size: 0.95rem; }
+    .seller-grid { display: grid; grid-template-columns: repeat(2,1fr); gap: 0.8rem; }
+    .seller-item { display: flex; flex-direction: column; gap: 0.2rem; }
+    .seller-label { font-size: 0.6rem; color: #6b89a5; text-transform: uppercase; }
+    .seller-value { font-weight: 600; color: #1e293b; display: flex; align-items: center; gap: 0.3rem; font-size: 0.8rem; }
+    .visit-shop-btn {
+      background: #0f3b5c; color: white; border: none; padding: 0.6rem; border-radius: 40px;
+      font-weight: 500; font-size: 0.8rem; cursor: pointer; display: inline-flex;
+      align-items: center; justify-content: center; gap: 0.5rem; margin-top: 1rem; width: 100%;
+    }
+
+    /* chat panel - mobile full width */
+    .chat-panel {
+      background: white; border-radius: 28px; box-shadow: 0 6px 16px rgba(0,0,0,0.03);
+      border: 1px solid #eef2f6; display: flex; flex-direction: column; overflow: hidden;
+      width: 100%; height: 550px; /* fixed height for chat */
+    }
+    .chat-header {
+      padding: 0.8rem 1rem; background: #0f3b5c; color: white;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .chat-header h2 { display: flex; align-items: center; gap: 0.5rem; font-size: 1rem; font-weight: 600; }
+    .chat-actions { display: flex; gap: 0.3rem; }
+    .chat-action-btn {
+      background: rgba(255,255,255,0.2); border: none; color: white;
+      width: 32px; height: 32px; border-radius: 50%; cursor: pointer; transition: 0.15s;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .chat-container { display: flex; flex: 1; overflow: hidden; min-height: 0; }
+    .contacts-sidebar {
+      width: 40%; background: #fafcff; border-right: 1px solid #e2ecf5;
+      display: flex; flex-direction: column;
+    }
+    .contacts-search { padding: 0.6rem; border-bottom: 1px solid #e2ecf5; }
+    .contacts-search input {
+      width: 100%; padding: 0.5rem 0.8rem; border: 2px solid #e2ecf5; border-radius: 40px;
+      font-size: 0.75rem; background: white;
+    }
+    .contacts-list { flex: 1; overflow-y: auto; }
+    .contact-item {
+      display: flex; align-items: center; gap: 0.5rem; padding: 0.6rem 0.6rem;
+      cursor: pointer; transition: 0.1s; border-bottom: 1px solid #eef2f6; position: relative;
+    }
+    .contact-item.active { background: #e1effa; border-left: 3px solid #0f3b5c; }
+    .contact-item.unread { background: #fff8e5; }
+    .contact-avatar {
+      width: 32px; height: 32px; border-radius: 50%; background: #e9f2fc;
+      display: flex; align-items: center; justify-content: center; color: #0f3b5c;
+      font-size: 1rem; flex-shrink: 0; overflow: hidden; border: 2px solid white;
+    }
+    .contact-info { flex: 1; min-width: 0; }
+    .contact-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.1rem; }
+    .contact-name { font-weight: 600; color: #1e293b; font-size: 0.7rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .contact-time { font-size: 0.55rem; color: #94a3b8; }
+    .contact-product { font-size: 0.6rem; color: #0f3b5c; display: flex; align-items: center; gap: 0.2rem; margin-bottom: 0.1rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .contact-last-message { font-size: 0.6rem; color: #64748b; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .unread-badge { background: #ef4444; color: white; font-size: 0.5rem; padding: 0.1rem 0.3rem; border-radius: 30px; margin-left: 0.2rem; }
+
+    .messages-area {
+      width: 60%; display: flex; flex-direction: column; background: #f0f5fa;
+    }
+    .messages-header {
+      padding: 0.6rem 0.8rem; background: white; border-bottom: 1px solid #e2ecf5;
+      display: flex; align-items: center; gap: 0.5rem;
+    }
+    .messages-header-avatar {
+      width: 32px; height: 32px; border-radius: 50%; background: #e1effa;
+      display: flex; align-items: center; justify-content: center; color: #0f3b5c;
+      font-size: 1rem; overflow: hidden;
+    }
+    .messages-header-info { flex: 1; }
+    .messages-header-name { font-weight: 600; color: #1e293b; font-size: 0.8rem; }
+    .messages-header-product { font-size: 0.6rem; color: #0f3b5c; display: flex; align-items: center; gap: 0.2rem; }
+    .messages-container {
+      flex: 1; overflow-y: auto; padding: 0.8rem; display: flex; flex-direction: column;
+      gap: 0.5rem; background: #f0f5fa;
+    }
+    .message { display: flex; flex-direction: column; max-width: 85%; }
+    .message.sent { align-self: flex-end; }
+    .message.received { align-self: flex-start; }
+    .message-bubble {
+      padding: 0.4rem 0.8rem; border-radius: 16px; font-size: 0.75rem; line-height: 1.4; word-wrap: break-word;
+    }
+    .message.sent .message-bubble { background: #0f3b5c; color: white; border-bottom-right-radius: 4px; }
+    .message.received .message-bubble { background: white; color: #1e293b; border: 1px solid #e2ecf5; border-bottom-left-radius: 4px; }
+    .message-time { font-size: 0.5rem; color: #94a3b8; margin-top: 0.1rem; display: flex; align-items: center; gap: 0.2rem; }
+    .message-input-area {
+      padding: 0.6rem 0.8rem; background: white; border-top: 1px solid #e2ecf5;
+      display: flex; gap: 0.4rem; align-items: center;
+    }
+    .message-input {
+      flex: 1; padding: 0.5rem 0.8rem; border: 2px solid #e2ecf5; border-radius: 40px;
+      font-size: 0.75rem; transition: 0.15s;
+    }
+    .message-input:focus { outline: none; border-color: #0f3b5c; }
+    .message-send-btn {
+      background: #0f3b5c; color: white; border: none; width: 34px; height: 34px;
+      border-radius: 50%; display: flex; align-items: center; justify-content: center;
+      cursor: pointer; transition: 0.15s;
+    }
+
+    .no-contact-selected, .no-messages {
+      height: 100%; display: flex; flex-direction: column; align-items: center;
+      justify-content: center; color: #94a3b8; padding: 0.8rem; text-align: center; font-size: 0.8rem;
+    }
+    .start-chat-btn {
+      background: #0f3b5c; color: white; border: none; padding: 0.4rem 1rem;
+      border-radius: 40px; font-size: 0.7rem; display: inline-flex; align-items: center;
+      gap: 0.4rem; cursor: pointer; margin-top: 0.5rem;
+    }
+
+    /* horizontal scroll (more products) */
+    .more-products-section {
+      background: white; border-radius: 28px; padding: 1.2rem;
+      border: 1px solid #eef2f6; width: 100%; margin-top: 1.5rem;
+    }
+    .section-header {
+      display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.8rem;
+    }
+    .section-header h3 { font-size: 1rem; color: #1e293b; display: flex; align-items: center; gap: 0.3rem; }
+    .section-header a { color: #0f3b5c; text-decoration: none; font-weight: 500; font-size: 0.8rem; }
+    .horizontal-scroll {
+      display: flex; gap: 0.8rem; overflow-x: auto; padding: 0.2rem 0 0.8rem;
+      scrollbar-width: thin;
+    }
+    .scroll-item {
+      flex: 0 0 140px; background: white; border-radius: 16px; border: 1px solid #eef2f6;
+      overflow: hidden; cursor: pointer; transition: 0.15s; box-shadow: 0 4px 8px rgba(0,0,0,0.02);
+    }
+    .scroll-item-image {
+      width: 100%; height: 120px; background-size: cover; background-position: center; position: relative;
+    }
+    .scroll-item-badge {
+      position: absolute; top: 5px; right: 5px; background: #2ecc71; color: white;
+      border-radius: 30px; padding: 0.15rem 0.5rem; font-size: 0.55rem; font-weight: 600;
+    }
+    .scroll-item-info { padding: 0.5rem; }
+    .scroll-item-name { font-weight: 600; color: #1e293b; margin-bottom: 0.2rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 0.8rem; }
+    .scroll-item-price { color: #0f3b5c; font-weight: 700; font-size: 0.8rem; }
+
+    .loading-state { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 200px; color: #94a3b8; }
+    .product-not-found { text-align: center; padding: 2rem; color: #6f8faf; }
+
+    /* footer */
+    footer {
+      background: #0f2c40; color: #cbdae6; margin-top: 1rem;
+      padding: 1.5rem 1rem 0.8rem; border-radius: 28px 28px 0 0;
+    }
+    .footer-content { display: flex; flex-direction: column; align-items: center; gap: 0.5rem; }
+    .social-only { display: flex; gap: 1.2rem; }
+    .social-only a { font-size: 1.5rem; color: #b0c6db; }
+    .copyright { text-align: center; font-size: 0.7rem; color: #98b1c9; margin-top: 1rem; border-top: 1px solid #1f4a6e; padding-top: 0.6rem; }
+  </style>
+</head>
+<body>
+  <!-- TOP BAR -->
+  <div class="top-bar">
+    <div class="logo-area">
+      <i class="fas fa-shopping-bag logo-icon"></i>
+      <div class="logo-text">GuraNeza<span>BuySmart</span></div>
+    </div>
+    <div class="top-actions">
+      <button class="letshop-btn" onclick="window.location.href='letshop.html'" title="Let's Shop"><i class="fas fa-shopping-bag"></i></button>
+      <button class="drawer-trigger" id="drawerTrigger"><i class="fas fa-bars"></i></button>
+    </div>
+  </div>
+
+  <!-- SIDE DRAWER -->
+  <div class="drawer-overlay" id="drawerOverlay"></div>
+  <div class="drawer" id="drawer">
+    <div class="drawer-header">
+      <div class="drawer-profile-img" id="drawerProfileImg"><i class="fas fa-user-circle"></i></div>
+      <span class="drawer-profile-name" id="drawerProfileName">Guest</span>
+    </div>
+    <div class="drawer-item" id="drawerCart">
+      <i class="fas fa-shopping-basket"></i> My Cart <span class="drawer-cart-badge" id="drawerCartCount">0</span>
+    </div>
+    <div class="drawer-item" id="drawerProfile">
+      <i class="fas fa-user"></i> Profile
+    </div>
+    <div class="drawer-item" id="drawerHelp">
+      <i class="fas fa-question-circle"></i> Help Center
+    </div>
+    <div class="drawer-divider"></div>
+    <div class="drawer-item" id="drawerLogout">
+      <i class="fas fa-sign-out-alt"></i> Logout
+    </div>
+    <div class="drawer-divider"></div>
+    <div class="drawer-item lang-option" data-lang="en">
+      <i class="fas fa-language"></i> English
+    </div>
+    <div class="drawer-item lang-option" data-lang="rw">
+      <i class="fas fa-language"></i> Kinyarwanda
+    </div>
+    <div class="close-drawer" id="closeDrawerBtn"><i class="fas fa-times"></i></div>
+  </div>
+
+  <!-- BOTTOM NAV -->
+  <div class="bottom-nav">
+    <a href="home.html" class="nav-item" data-nav="home"><i class="fas fa-home"></i><span>Home</span></a>
+    <a href="buy.html" class="nav-item active" data-nav="buy"><i class="fas fa-shopping-cart"></i><span>Buy</span></a>
+    <a href="sell.html" class="nav-item" data-nav="sell"><i class="fas fa-plus-circle"></i><span>Sell</span></a>
+    <a href="shops.html" class="nav-item" data-nav="shops"><i class="fas fa-store"></i><span>Shops</span></a>
+  </div>
+
+  <!-- Toast container -->
+  <div id="toastContainer" class="toast-container"></div>
+
+  <!-- Help modal -->
+  <div id="contactModal" class="modal">
+    <div class="modal-content">
+      <span class="close-modal" id="closeModalBtn">&times;</span>
+      <h3><i class="fas fa-question-circle"></i> Help Center</h3>
+      <p><i class="fas fa-envelope"></i> <a href="mailto:guraneza@gmail.com">guraneza@gmail.com</a></p>
+      <p><i class="fas fa-phone-alt"></i> +250 795583674</p>
+      <p><i class="fas fa-life-ring"></i> <a href="#" id="modalHelpCenter">FAQ</a></p>
+      <p><i class="fab fa-tiktok"></i> <a href="#">@guraneza</a></p>
+    </div>
+  </div>
+
+  <!-- HD image viewer -->
+  <div id="imageViewerModal" class="image-viewer-modal">
+    <div class="image-viewer-content">
+      <span class="image-viewer-close" onclick="window.closeImageViewer()">&times;</span>
+      <button class="image-viewer-nav prev" onclick="window.navigateImage(-1)" id="prevImageBtn"><i class="fas fa-chevron-left"></i></button>
+      <img class="image-viewer-main" id="viewerMainImage" src="" alt="">
+      <button class="image-viewer-nav next" onclick="window.navigateImage(1)" id="nextImageBtn"><i class="fas fa-chevron-right"></i></button>
+      <div class="image-viewer-counter" id="imageCounter"></div>
+    </div>
+  </div>
+
+  <main class="main-content">
+    <div class="product-chat-stack">
+      <!-- product panel -->
+      <div class="product-panel" id="productPanel">
+        <div class="loading-state"><i class="fas fa-spinner"></i><p>Loading product...</p></div>
+      </div>
+      <!-- chat panel -->
+      <div class="chat-panel" id="chatPanel">
+        <div class="loading-state"><i class="fas fa-spinner"></i><p>Loading chat...</p></div>
+      </div>
+    </div>
+
+    <!-- horizontal scroll: more products -->
+    <div class="more-products-section">
+      <div class="section-header">
+        <h3><i class="fas fa-layer-group"></i> More for you</h3>
+        <a href="home.html">View all <i class="fas fa-arrow-right"></i></a>
+      </div>
+      <div class="horizontal-scroll" id="horizontalScroll"></div>
+    </div>
+  </main>
+
+  <footer>
+    <div class="footer-content">
+      <div class="footer-brand"><p>© 2026 GuraNeza | BuySmart</p></div>
+      <div class="social-only">
+        <a href="#"><i class="fab fa-tiktok"></i></a>
+        <a href="#"><i class="fab fa-youtube"></i></a>
+        <a href="#"><i class="fab fa-instagram"></i></a>
+        <a href="#"><i class="fab fa-twitter"></i></a>
+      </div>
+    </div>
+    <div class="copyright"><span>Buy Smart, Sell Easy: @guraneza</span></div>
+  </footer>
+
+  <!-- Firebase SDK (modular) - FIXED version -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getDatabase, ref, onValue, push, set, query, orderByChild, equalTo, update, get } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyAr6-rTa8yQCxr41JjWysFLHeFxH0C2IMI",
+      authDomain: "guraneza-714f7.firebaseapp.com",
+      databaseURL: "https://guraneza-714f7-default-rtdb.firebaseio.com",
+      projectId: "guraneza-714f7",
+      storageBucket: "guraneza-714f7.firebasestorage.app",
+      messagingSenderId: "457107620336",
+      appId: "1:457107620336:web:1583db305b03528fcf5d35"
+    };
+    
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const database = getDatabase(app);
+    const auth = getAuth(app);
+
+    // --- globals ---
+    let currentUser = null;
+    let userProfile = null;
+    let currentProduct = null;
+    let currentProductId = null;
+    let currentChatPartner = null;
+    let isSeller = false;
+    let shops = [];
+    let allProducts = [];
+    let productImages = [];
+    let currentImageIndex = 0;
+    let chatsListener = null;
+    let messagesListener = null;
+    
+    // DOM elements
+    const productPanel = document.getElementById('productPanel');
+    const chatPanel = document.getElementById('chatPanel');
+    const horizontalScroll = document.getElementById('horizontalScroll');
+    
+    // drawer elements
+    const drawer = document.getElementById('drawer');
+    const overlay = document.getElementById('drawerOverlay');
+    const drawerTrigger = document.getElementById('drawerTrigger');
+    const closeDrawer = document.getElementById('closeDrawerBtn');
+    const drawerProfileImg = document.getElementById('drawerProfileImg');
+    const drawerProfileName = document.getElementById('drawerProfileName');
+    const drawerCartCount = document.getElementById('drawerCartCount');
+    const drawerCart = document.getElementById('drawerCart');
+    const drawerProfile = document.getElementById('drawerProfile');
+    const drawerHelp = document.getElementById('drawerHelp');
+    const drawerLogout = document.getElementById('drawerLogout');
+
+    // --- Helper Functions ---
+    function showToast(message, type = 'success', duration = 2800) {
+      const container = document.getElementById('toastContainer');
+      const toast = document.createElement('div'); 
+      toast.className = `toast ${type}`;
+      const icons = { success:'fa-check-circle', error:'fa-exclamation-circle', warning:'fa-exclamation-triangle' };
+      const titles = { success:'Success', error:'Error', warning:'Warning' };
+      toast.innerHTML = `
+        <div class="toast-icon"><i class="fas ${icons[type]}"></i></div>
+        <div class="toast-content"><div class="toast-title">${titles[type]}</div><div class="toast-message">${message}</div></div>
+        <div class="toast-close" onclick="this.parentElement.remove()"><i class="fas fa-times"></i></div>
+      `;
+      container.appendChild(toast);
+      setTimeout(() => toast.classList.add('show'), 10);
+      setTimeout(() => { 
+        toast.classList.remove('show'); 
+        setTimeout(() => toast.remove(), 200); 
+      }, duration);
+    }
+
+    // Get product ID from URL
+    function getProductIdFromUrl() { 
+      return new URLSearchParams(window.location.search).get('id'); 
+    }
+
+    // Load shops data
+    async function loadShops() {
+      try {
+        const snap = await get(ref(database, 'shops'));
+        if(snap.exists()) {
+          shops = Object.entries(snap.val()).map(([k,v]) => ({ 
+            id: v.shopId || k, 
+            name: v.name || '', 
+            phone: v.contact?.phone || '', 
+            location: v.location || '' 
+          }));
+        }
+      } catch(e) {
+        console.warn("Error loading shops:", e);
+      }
+    }
+
+    // Load all products (for horizontal scroll)
+    async function loadAllProducts() {
+      try {
+        const snap = await get(ref(database, 'products'));
+        if(snap.exists()) {
+          allProducts = Object.entries(snap.val()).map(([k,p]) => {
+            const images = []; 
+            if(p.image1) images.push(p.image1); 
+            if(p.image2) images.push(p.image2); 
+            if(p.image3) images.push(p.image3);
+            return { 
+              id: p.productId || k, 
+              name: p.name || 'Unnamed', 
+              price: parseFloat(p.price) || 0, 
+              images, 
+              verified: p.verified || false, 
+              category: p.category || '', 
+              description: p.description || '', 
+              shopId: p.shopId || '', 
+              shopName: p.shopName || '', 
+              shopPhone: p.shopPhone || '', 
+              shopLocation: p.shopLocation || '', 
+              negociable: p.negotiable || false, 
+              timestamp: p.timestamp || new Date().toISOString() 
+            };
+          });
+          allProducts.sort((a,b) => new Date(b.timestamp) - new Date(a.timestamp));
+        }
+      } catch(e) {
+        console.warn("Error loading products:", e);
+      }
+    }
+
+    // Format product data
+    async function formatProduct(p, key) {
+      const images = []; 
+      if(p.image1) images.push(p.image1); 
+      if(p.image2) images.push(p.image2); 
+      if(p.image3) images.push(p.image3);
+      
+      const hasShop = !!p.shopId; 
+      let seller = {};
+      
+      if(hasShop) {
+        const shop = shops.find(s => s.id === p.shopId);
+        seller = { 
+          name: shop?.name || p.shopName || 'Shop', 
+          phone: shop?.phone || p.shopPhone || '', 
+          email: shop?.email || p.shopEmail || '', 
+          location: shop?.location || p.shopLocation || '', 
+          isShop: true, 
+          shopId: p.shopId 
+        };
+      } else {
+        seller = { 
+          name: p.seller?.name || p.sellerName || p.postedBy || 'Seller', 
+          phone: p.seller?.phone || p.sellerPhone || '', 
+          email: p.seller?.email || p.sellerEmail || '', 
+          location: p.seller?.location || p.sellerLocation || '', 
+          isShop: false 
+        };
+      }
+      
+      return { 
+        firebaseKey: key, 
+        id: p.productId || key, 
+        name: p.name || 'Unnamed', 
+        category: p.category || 'Other', 
+        description: p.description || '', 
+        negociable: p.negotiable || false, 
+        verified: p.verified || false, 
+        price: parseFloat(p.price) || 0, 
+        images, 
+        seller, 
+        timestamp: p.timestamp || new Date().toISOString(), 
+        isFromShop: hasShop, 
+        shopId: p.shopId || null 
+      };
+    }
+
+    // Load product by ID
+    async function loadProduct() {
+      const pid = getProductIdFromUrl(); 
+      currentProductId = pid;
+      
+      if(!pid) { 
+        productPanel.innerHTML = `<div class="product-not-found"><i class="fas fa-box-open"></i><h3>No product selected</h3><a href="home.html">Browse products</a></div>`; 
+        return; 
+      }
+      
+      localStorage.setItem('lastViewedProduct', pid);
+      
+      try {
+        // First ensure shops are loaded
+        await loadShops();
+        
+        const snap = await get(ref(database, 'products'));
+        if(!snap.exists()) throw new Error('No products found in database');
+        
+        const data = snap.val(); 
+        let found = null; 
+        let key = null;
+        
+        // Find product by ID (check multiple possible ID fields)
+        Object.keys(data).forEach(k => { 
+          if(data[k].productId === pid || k === pid || data[k].id === pid) { 
+            found = data[k]; 
+            key = k; 
+          } 
+        });
+        
+        if(!found) throw new Error('Product not found with ID: ' + pid);
+        
+        currentProduct = await formatProduct(found, key);
+        productImages = currentProduct.images || [];
+        
+        if(currentUser && currentProduct.seller) {
+          isSeller = (currentProduct.seller.email === currentUser.email);
+        }
+        
+        renderProductPanel();
+        await loadAllProducts(); // Load other products for horizontal scroll
+        renderHorizontalScroll();
+        loadChats(); // Initialize chat
+      } catch(e) {
+        console.error("Error loading product:", e);
+        productPanel.innerHTML = `<div class="product-not-found"><i class="fas fa-exclamation-triangle"></i><h3>Product not found</h3><p>${e.message}</p><a href="home.html">Go home</a></div>`;
+      }
+    }
+
+    // Render product panel
+    function renderProductPanel() {
+      const s = currentProduct.seller; 
+      const images = currentProduct.images || [];
+      
+      let gallery = '';
+      if(images.length) {
+        gallery = `
+          <div class="product-images-section">
+            <div class="main-image-container" onclick="window.openImageViewer(0)">
+              <div class="main-image" id="mainImage" style="background-image:url('${images[0]}')"></div>
+            </div>
+            <div class="image-thumbnails">
+              ${images.map((img,i) => `<div class="image-thumbnail ${i===0?'active':''}" style="background-image:url('${img}')" onclick="window.changeMainImage(this,'${img}',${i})"></div>`).join('')}
+            </div>
+          </div>`;
+      } else {
+        gallery = `<div class="no-images"><div><i class="fas fa-image"></i><p>No images</p></div></div>`;
+      }
+      
+      const shopBadge = currentProduct.isFromShop ? 
+        `<span class="badge shop" onclick="window.visitShop()"><i class="fas fa-store"></i> Visit Shop →</span>` : 
+        `<span class="badge individual"><i class="fas fa-user"></i> Individual</span>`;
+      
+      productPanel.innerHTML = gallery + `
+        <div class="product-info-section">
+          <h1 class="product-title">${currentProduct.name}</h1>
+          <div class="product-badges">
+            ${shopBadge}
+            ${currentProduct.verified ? '<span class="badge verified"><i class="fas fa-check-circle"></i> Verified</span>' : ''}
+            ${currentProduct.negociable ? '<span class="badge negotiable"><i class="fas fa-handshake"></i> Negotiable</span>' : ''}
+          </div>
+          <div class="product-price">${Number(currentProduct.price).toLocaleString()}</div>
+          <div class="product-category"><i class="fas fa-folder"></i> ${currentProduct.category || 'Uncategorized'}</div>
+          <button class="add-to-cart-large" onclick="addToCart('${currentProduct.id}', event)"><i class="fas fa-shopping-cart"></i> Add to Cart</button>
+          <div class="product-description">${currentProduct.description || 'No description available.'}</div>
+          <div class="seller-info">
+            <h3><i class="fas fa-${currentProduct.isFromShop ? 'store' : 'user-circle'}"></i> ${currentProduct.isFromShop ? 'Shop Info' : 'Seller Info'}</h3>
+            <div class="seller-grid">
+              <div class="seller-item">
+                <span class="seller-label">Name</span>
+                <span class="seller-value"><i class="fas fa-${currentProduct.isFromShop ? 'store' : 'user-circle'}"></i> ${s.name || ''}</span>
+              </div>
+              <div class="seller-item">
+                <span class="seller-label">Phone</span>
+                <span class="seller-value"><i class="fas fa-phone"></i> ${s.phone || 'N/A'}</span>
+              </div>
+              <div class="seller-item">
+                <span class="seller-label">Email</span>
+                <span class="seller-value"><i class="fas fa-envelope"></i> ${s.email || 'N/A'}</span>
+              </div>
+              <div class="seller-item">
+                <span class="seller-label">Location</span>
+                <span class="seller-value"><i class="fas fa-map-marker-alt"></i> ${s.location || 'N/A'}</span>
+              </div>
+            </div>
+            ${currentProduct.isFromShop ? 
+              `<button class="visit-shop-btn" onclick="window.visitShop()"><i class="fas fa-store"></i> Visit Shop <i class="fas fa-arrow-right"></i></button>` : 
+              ''}
+          </div>
+        </div>`;
+    }
+
+    // Render horizontal scroll of other products
+    function renderHorizontalScroll() {
+      if(!horizontalScroll) return;
+      
+      const others = currentProduct ? allProducts.filter(p => p.id !== currentProduct.id) : allProducts;
+      const display = others.slice(0, 20);
+      
+      if(!display.length) { 
+        horizontalScroll.innerHTML = '<div style="padding:1rem; color:#94a3b8;">No other products</div>'; 
+        return; 
+      }
+      
+      horizontalScroll.innerHTML = display.map(p => {
+        const img = p.images?.[0] || 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400&auto=format';
+        return `<div class="scroll-item" onclick="window.location.href='?id=${p.id}'">
+          <div class="scroll-item-image" style="background-image:url('${img}')">
+            ${p.verified ? '<div class="scroll-item-badge"><i class="fas fa-check-circle"></i></div>' : ''}
+          </div>
+          <div class="scroll-item-info">
+            <div class="scroll-item-name">${p.name}</div>
+            <div class="scroll-item-price">${Number(p.price).toLocaleString()} RWF</div>
+          </div>
+        </div>`;
+      }).join('');
+    }
+
+    // --- Image Viewer Functions ---
+    window.openImageViewer = function(idx) {
+      if(!productImages.length) return;
+      currentImageIndex = idx;
+      const modal = document.getElementById('imageViewerModal');
+      document.getElementById('viewerMainImage').src = productImages[idx];
+      document.getElementById('imageCounter').innerText = `${idx+1} / ${productImages.length}`;
+      document.getElementById('prevImageBtn').disabled = idx === 0;
+      document.getElementById('nextImageBtn').disabled = idx === productImages.length-1;
+      modal.classList.add('active'); 
+      document.body.style.overflow = 'hidden';
+    };
+    
+    window.closeImageViewer = function() {
+      document.getElementById('imageViewerModal').classList.remove('active');
+      document.body.style.overflow = '';
+    };
+    
+    window.navigateImage = function(dir) {
+      const n = currentImageIndex + dir;
+      if(n >= 0 && n < productImages.length) window.openImageViewer(n);
+    };
+    
+    window.changeMainImage = function(el, url, idx) {
+      document.getElementById('mainImage').style.backgroundImage = `url('${url}')`;
+      document.querySelectorAll('.image-thumbnail').forEach(t => t.classList.remove('active'));
+      el.classList.add('active'); 
+      currentImageIndex = idx;
+    };
+    
+    window.visitShop = function() { 
+      if(currentProduct?.shopId) window.location.href = `letshop.html?shop=${currentProduct.shopId}`; 
+    };
+
+    // --- Cart Functions ---
+    window.addToCart = async function(productId, event) {
+      if(event) event.stopPropagation();
+      
+      const product = allProducts.find(p => p.id === productId) || currentProduct;
+      if(!product) return showToast('Product not found', 'error');
+      
+      if(!currentUser) {
+        showToast('Please log in to add items', 'warning');
+        setTimeout(() => window.location.href = 'index.html', 1200);
+        return;
+      }
+      
+      try {
+        const userCartRef = ref(database, `carts/${currentUser.uid}`);
+        const snap = await get(userCartRef);
+        let exists = false;
+        
+        if(snap.exists()) {
+          for(const item of Object.values(snap.val())) {
+            if(item.id === productId) { 
+              exists = true; 
+              break; 
+            }
+          }
+        }
+        
+        if(!exists) {
+          const cartItem = { 
+            id: product.id, 
+            name: product.name, 
+            price: parseFloat(product.price) || 0, 
+            addedAt: new Date().toISOString(), 
+            category: product.category || '', 
+            description: product.description || '', 
+            shopId: product.shopId || '', 
+            shopName: product.shopName || '', 
+            verified: product.verified || false, 
+            negociable: product.negociable || false 
+          };
+          
+          if(product.images?.length) { 
+            cartItem.images = {}; 
+            product.images.forEach((img, i) => { 
+              if(img) cartItem.images[`image${i+1}`] = img; 
+            }); 
+          }
+          
+          await set(push(userCartRef), cartItem);
+          await loadUserCart();
+          showToast(`${product.name} added to cart`);
+        } else {
+          showToast(`${product.name} already in cart`, 'warning');
+        }
+      } catch(err) { 
+        console.error(err);
+        showToast('Error adding to cart', 'error'); 
+      }
+    };
+
+    async function loadUserCart() {
+      if(!currentUser) { 
+        if(drawerCartCount) drawerCartCount.textContent = '0'; 
+        return; 
+      }
+      try {
+        const snap = await get(ref(database, `carts/${currentUser.uid}`));
+        if(drawerCartCount) {
+          drawerCartCount.textContent = snap.exists() ? Object.keys(snap.val()).length : '0';
+        }
+      } catch { 
+        if(drawerCartCount) drawerCartCount.textContent = '0'; 
+      }
+    }
+
+    // --- User Profile Functions ---
+    async function loadUserProfile() {
+      if(!currentUser) return;
+      try {
+        const snap = await get(ref(database, `users/${currentUser.uid}`));
+        if(snap.exists()) {
+          userProfile = snap.val();
+        } else {
+          userProfile = { 
+            uid: currentUser.uid, 
+            email: currentUser.email, 
+            displayName: currentUser.email?.split('@')[0] || 'User' 
+          };
+        }
+      } catch { 
+        userProfile = null; 
+      }
+    }
+    
+    function updateProfileSection() {
+      if(currentUser && userProfile) {
+        if(drawerProfileName) {
+          drawerProfileName.textContent = userProfile.displayName || currentUser.email?.split('@')[0] || 'User';
+        }
+        if(drawerProfileImg) {
+          if(userProfile.profileImage) {
+            drawerProfileImg.innerHTML = `<img src="${userProfile.profileImage}" alt="">`;
+          } else {
+            drawerProfileImg.innerHTML = '<i class="fas fa-user-circle"></i>';
+          }
+        }
+      } else {
+        if(drawerProfileName) drawerProfileName.textContent = 'Guest';
+        if(drawerProfileImg) drawerProfileImg.innerHTML = '<i class="fas fa-user-circle"></i>';
+      }
+    }
+
+    // --- Chat Functions ---
+    function loadChats() {
+      if(!currentUser || !currentProduct) { 
+        showEmptyChatPanel(); 
+        return; 
+      }
+      
+      if(chatsListener) chatsListener();
+      
+      const q = query(ref(database, 'chats'), orderByChild('productId'), equalTo(currentProduct.id));
+      
+      chatsListener = onValue(q, async (snap) => {
+        if(snap.exists()) {
+          await processChats(snap.val());
+        } else {
+          showEmptyChatPanel();
+        }
+      }, (error) => {
+        console.warn("Chat listener error:", error);
+        showEmptyChatPanel();
+      });
+    }
+
+    async function processChats(chats) {
+      if(!currentUser || !currentProduct || !currentProduct.seller) return;
+      
+      const userEmail = currentUser.email;
+      const sellerEmail = currentProduct.seller.email;
+      const chatsArray = Object.values(chats);
+      
+      let relevant = [];
+      if(isSeller) {
+        relevant = chatsArray.filter(c => c.productId === currentProduct.id);
+      } else {
+        relevant = chatsArray.filter(c => 
+          c.productId === currentProduct.id && 
+          ((c.sender === userEmail && c.receiver === sellerEmail) || 
+           (c.sender === sellerEmail && c.receiver === userEmail))
+        );
+      }
+      
+      let contactsMap = new Map();
+      
+      for(let c of relevant) {
+        let other = isSeller ? (c.sender === userEmail ? c.receiver : c.sender) : sellerEmail;
+        
+        if(!contactsMap.has(other)) {
+          contactsMap.set(other, { 
+            username: other, 
+            lastMessage: c.message, 
+            timestamp: c.timestamp, 
+            productName: c.productName || currentProduct.name, 
+            unread: (c.receiver === userEmail && !c.read), 
+            profileImage: '' 
+          });
+        } else {
+          let ex = contactsMap.get(other);
+          if(new Date(c.timestamp) > new Date(ex.timestamp)) { 
+            ex.lastMessage = c.message; 
+            ex.timestamp = c.timestamp; 
+            ex.unread = (c.receiver === userEmail && !c.read); 
+          }
+        }
+      }
+      
+      let chatContacts = Array.from(contactsMap.values()).sort((a,b) => new Date(b.timestamp) - new Date(a.timestamp));
+      renderChatPanel(chatContacts);
+    }
+
+    function showEmptyChatPanel() {
+      if(!currentProduct) { 
+        if(chatPanel) {
+          chatPanel.innerHTML = `
+            <div class="chat-header">
+              <h2><i class="fas fa-comments"></i> Messages</h2>
+            </div>
+            <div class="no-contact-selected">
+              <i class="fas fa-comments"></i>
+              <p>No conversation</p>
+            </div>`;
+        }
+        return; 
+      }
+      
+      const own = (currentProduct.seller && currentUser && currentProduct.seller.email === currentUser.email);
+      
+      if(chatPanel) {
+        chatPanel.innerHTML = `
+          <div class="chat-header">
+            <h2><i class="fas fa-comments"></i> Messages</h2>
+            <div class="chat-actions">
+              <button class="chat-action-btn" onclick="window.refreshChats()"><i class="fas fa-sync-alt"></i></button>
+            </div>
+          </div>
+          <div class="no-contact-selected">
+            <i class="fas fa-comment-dots"></i>
+            <p>No messages yet</p>
+            ${!own && currentProduct ? 
+              `<button class="start-chat-btn" onclick="window.startChatWithSeller()">
+                <i class="fas fa-comment"></i> Start Chat
+              </button>` : 
+              ''}
+          </div>
+        `;
+      }
+    }
+
+    function renderChatPanel(contacts) {
+      if(!contacts || !contacts.length) { 
+        showEmptyChatPanel(); 
+        return; 
+      }
+      
+      if(!chatPanel) return;
+      
+      chatPanel.innerHTML = `
+        <div class="chat-header">
+          <h2><i class="fas fa-comments"></i> Messages</h2>
+          <div class="chat-actions">
+            <button class="chat-action-btn" onclick="window.refreshChats()"><i class="fas fa-sync-alt"></i></button>
+          </div>
+        </div>
+        <div class="chat-container">
+          <div class="contacts-sidebar">
+            <div class="contacts-search">
+              <input type="text" id="contactSearch" placeholder="Search contacts..." oninput="window.filterContacts()">
+            </div>
+            <div class="contacts-list" id="contactsList">
+              ${renderContactsList(contacts)}
+            </div>
+          </div>
+          <div class="messages-area" id="messagesArea">
+            ${currentChatPartner ? renderMessagesArea() : renderNoContactSelected()}
+          </div>
+        </div>
+      `;
+      
+      if(currentChatPartner) {
+        loadMessages();
+      } else if(contacts.length) {
+        setTimeout(() => window.selectContact(contacts[0].username), 100);
+      }
+    }
+
+    function renderContactsList(contacts) {
+      return contacts.map(c => `
+        <div class="contact-item ${currentChatPartner === c.username ? 'active' : ''} ${c.unread ? 'unread' : ''}" onclick="window.selectContact('${c.username}')">
+          <div class="contact-avatar">
+            ${c.profileImage ? `<img src="${c.profileImage}">` : '<i class="fas fa-user-circle"></i>'}
+          </div>
+          <div class="contact-info">
+            <div class="contact-header">
+              <span class="contact-name">${c.username}</span>
+              <span class="contact-time">${formatTime(c.timestamp)}</span>
+            </div>
+            <div class="contact-product">
+              <i class="fas fa-tag"></i> ${c.productName}
+            </div>
+            <div class="contact-last-message">${c.lastMessage}</div>
+          </div>
+          ${c.unread ? '<span class="unread-badge">New</span>' : ''}
+        </div>`).join('');
+    }
+
+    function formatTime(ts) {
+      try {
+        let d = new Date(ts), n = new Date();
+        return (n - d < 864e5) ? 
+          d.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) : 
+          d.toLocaleDateString([], {month:'short', day:'numeric'});
+      } catch {
+        return '';
+      }
+    }
+
+    function renderMessagesArea() {
+      if(!currentChatPartner || !currentProduct) return renderNoContactSelected();
+      return `<div class="messages-header">
+        <div class="messages-header-avatar">${currentChatPartner?.charAt(0).toUpperCase() || ''}</div>
+        <div class="messages-header-info">
+          <div class="messages-header-name">${currentChatPartner}</div>
+          <div class="messages-header-product"><i class="fas fa-tag"></i> ${currentProduct?.name}</div>
+        </div>
+      </div>
+      <div class="messages-container" id="messagesContainer"></div>
+      <div class="message-input-area">
+        <input type="text" class="message-input" id="messageInput" placeholder="Type..." onkeypress="if(event.key==='Enter') window.sendMessage()">
+        <button class="message-send-btn" onclick="window.sendMessage()"><i class="fas fa-paper-plane"></i></button>
+      </div>`;
+    }
+    
+    function renderNoContactSelected() { 
+      return `<div class="no-contact-selected"><i class="fas fa-comment-dots"></i><p>Select a contact</p></div>`; 
+    }
+    
+    function renderNoMessages() { 
+      return `<div class="no-messages"><i class="fas fa-comment"></i><p>No messages yet</p></div>`; 
+    }
+
+    window.selectContact = function(username) {
+      currentChatPartner = username;
+      
+      // Update active class on contact items
+      document.querySelectorAll('.contact-item').forEach(i => { 
+        const nameEl = i.querySelector('.contact-name');
+        if(nameEl && nameEl.textContent === username) {
+          i.classList.add('active');
+        } else {
+          i.classList.remove('active');
+        }
+      });
+      
+      const messagesArea = document.getElementById('messagesArea');
+      if(messagesArea) {
+        messagesArea.innerHTML = renderMessagesArea();
+      }
+      
+      loadMessages(); 
+      markMessagesAsRead(username);
+    };
+
+    function loadMessages() {
+      if(!currentUser || !currentProduct || !currentChatPartner) return;
+      
+      if(messagesListener) messagesListener();
+      
+      const q = query(ref(database, 'chats'), orderByChild('productId'), equalTo(currentProduct.id));
+      
+      messagesListener = onValue(q, (snap) => {
+        if(!snap.exists()) { 
+          const container = document.getElementById('messagesContainer');
+          if(container) container.innerHTML = renderNoMessages(); 
+          return; 
+        }
+        
+        let msgs = Object.values(snap.val()).filter(c => 
+          c.productId === currentProduct.id && 
+          ((c.sender === currentUser.email && c.receiver === currentChatPartner) || 
+           (c.sender === currentChatPartner && c.receiver === currentUser.email))
+        ).sort((a,b) => new Date(a.timestamp) - new Date(b.timestamp));
+        
+        let container = document.getElementById('messagesContainer');
+        if(!container) return;
+        
+        if(!msgs.length) {
+          container.innerHTML = renderNoMessages();
+        } else {
+          container.innerHTML = msgs.map(m => `
+            <div class="message ${m.sender === currentUser.email ? 'sent' : 'received'}">
+              <div class="message-bubble">${m.message}</div>
+              <div class="message-time">
+                ${new Date(m.timestamp).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}
+                ${m.sender === currentUser.email ? '<span class="message-status"><i class="fas fa-check-double"></i></span>' : ''}
+              </div>
+            </div>
+          `).join('');
+        }
+        container.scrollTop = container.scrollHeight;
+      });
+    }
+
+    async function markMessagesAsRead(contact) {
+      if(!currentUser || !currentProduct) return;
+      
+      try {
+        let snap = await get(query(ref(database, 'chats'), orderByChild('productId'), equalTo(currentProduct.id)));
+        if(!snap.exists()) return;
+        
+        let updates = {};
+        snap.forEach(ch => { 
+          let c = ch.val(); 
+          if(c.receiver === currentUser.email && c.sender === contact && !c.read) {
+            updates[`${ch.key}/read`] = true; 
+          } 
+        });
+        
+        if(Object.keys(updates).length) {
+          await update(ref(database), updates);
+        }
+      } catch(e) {
+        console.warn("Error marking messages as read:", e);
+      }
+    }
+
+    window.sendMessage = async function() {
+      let input = document.getElementById('messageInput');
+      if(!input) return;
+      
+      let msg = input.value.trim();
+      if(!msg || !currentChatPartner || !currentUser || !currentProduct) {
+        showToast('Cannot send message', 'error');
+        return;
+      }
+      
+      try {
+        let newMsg = { 
+          sender: currentUser.email, 
+          receiver: currentChatPartner, 
+          message: msg, 
+          timestamp: new Date().toISOString(), 
+          productId: currentProduct.id, 
+          productName: currentProduct.name, 
+          read: false 
+        };
+        await set(push(ref(database, 'chats')), newMsg);
+        input.value = ''; 
+        showToast('Message sent');
+      } catch(e) { 
+        console.error(e);
+        showToast('Error sending message', 'error'); 
+      }
+    };
+
+    window.startChatWithSeller = async function() {
+      if(!currentProduct || !currentUser) { 
+        showToast('Please log in', 'warning'); 
+        return; 
+      }
+      
+      let sellerEmail = currentProduct.seller?.email;
+      if(!sellerEmail || sellerEmail === currentUser.email) {
+        showToast('Cannot start chat', 'warning'); 
+        return;
+      }
+      
+      try {
+        let q = query(ref(database, 'chats'), orderByChild('productId'), equalTo(currentProduct.id));
+        let snap = await get(q); 
+        let exists = false;
+        
+        if(snap.exists()) {
+          snap.forEach(c => { 
+            let ch = c.val(); 
+            if((ch.sender === currentUser.email && ch.receiver === sellerEmail) || 
+               (ch.sender === sellerEmail && ch.receiver === currentUser.email)) {
+              exists = true; 
+            } 
+          });
+        }
+        
+        if(!exists) {
+          await set(push(ref(database, 'chats')), { 
+            sender: currentUser.email, 
+            receiver: sellerEmail, 
+            message: `Hello, I'm interested in ${currentProduct.name}`, 
+            timestamp: new Date().toISOString(), 
+            productId: currentProduct.id, 
+            productName: currentProduct.name, 
+            read: false 
+          });
+          showToast('Chat started');
+        }
+        
+        currentChatPartner = sellerEmail; 
+        loadChats();
+      } catch(e) {
+        console.error(e);
+        showToast('Error starting chat', 'error');
+      }
+    };
+    
+    window.refreshChats = function() { 
+      loadChats(); 
+      showToast('Refreshed'); 
+    };
+    
+    window.filterContacts = function() {
+      let term = document.getElementById('contactSearch')?.value.toLowerCase() || '';
+      document.querySelectorAll('.contact-item').forEach(i => { 
+        let t = i.innerText.toLowerCase(); 
+        i.style.display = (t.includes(term)) ? 'flex' : 'none'; 
+      });
+    };
+
+    // --- Authentication ---
+    onAuthStateChanged(auth, async (user) => {
+      currentUser = user;
+      
+      if(user) { 
+        await loadUserProfile(); 
+        await loadUserCart(); 
+        await loadShops(); 
+        await loadAllProducts(); 
+        await loadProduct(); 
+      } else { 
+        userProfile = null; 
+        updateProfileSection(); 
+        if(drawerCartCount) drawerCartCount.textContent = '0'; 
+        await loadAllProducts(); 
+        await loadProduct(); 
+      }
+      
+      updateProfileSection();
+    });
+
+    // --- Drawer Controls ---
+    if(drawerTrigger) {
+      drawerTrigger.addEventListener('click', () => {
+        drawer.classList.add('active');
+        overlay.classList.add('active');
+      });
+    }
+    
+    function closeDrawerFn() {
+      drawer.classList.remove('active');
+      overlay.classList.remove('active');
+    }
+    
+    if(overlay) overlay.addEventListener('click', closeDrawerFn);
+    if(closeDrawer) closeDrawer.addEventListener('click', closeDrawerFn);
+
+    if(drawerCart) {
+      drawerCart.addEventListener('click', () => { 
+        window.location.href = 'profile.html'; 
+      });
+    }
+    
+    if(drawerProfile) {
+      drawerProfile.addEventListener('click', () => { 
+        window.location.href = 'profile.html'; 
+      });
+    }
+    
+    if(drawerHelp) {
+      drawerHelp.addEventListener('click', () => { 
+        document.getElementById('contactModal').classList.add('active'); 
+        closeDrawerFn(); 
+      });
+    }
+    
+    if(drawerLogout) {
+      drawerLogout.addEventListener('click', async () => { 
+        await signOut(auth); 
+        showToast('Logged out', 'success'); 
+        closeDrawerFn(); 
+        setTimeout(() => window.location.href = 'index.html', 1000); 
+      });
+    }
+
+    // --- Modal and Language Setup ---
+    document.addEventListener('DOMContentLoaded', () => {
+      const modal = document.getElementById('contactModal');
+      const helpLink = document.getElementById('helpCenterLink');
+      if(helpLink) {
+        helpLink.addEventListener('click', (e) => { 
+          e.preventDefault(); 
+          modal.classList.add('active'); 
+        });
+      }
+      
+      const closeModalBtn = document.getElementById('closeModalBtn');
+      if(closeModalBtn) {
+        closeModalBtn.addEventListener('click', () => modal.classList.remove('active'));
+      }
+      
+      window.addEventListener('click', e => e.target === modal && modal.classList.remove('active'));
+      
+      const modalHelpCenter = document.getElementById('modalHelpCenter');
+      if(modalHelpCenter) {
+        modalHelpCenter.addEventListener('click', (e) => { 
+          e.preventDefault(); 
+          showToast('FAQ coming soon', 'warning'); 
+        });
+      }
+
+      document.addEventListener('keydown', e => {
+        let im = document.getElementById('imageViewerModal');
+        if(im && im.classList.contains('active')) {
+          if(e.key === 'Escape') window.closeImageViewer();
+          else if(e.key === 'ArrowLeft') window.navigateImage(-1);
+          else if(e.key === 'ArrowRight') window.navigateImage(1);
+        }
+      });
+
+      // Language toggle
+      const langOpts = document.querySelectorAll('.lang-option');
+      function setLanguage(l) { 
+        localStorage.setItem('guraneza_lang', l); 
+        langOpts.forEach(o => o.classList.toggle('active', o.dataset.lang === l)); 
+      }
+      setLanguage(localStorage.getItem('guraneza_lang') || 'en');
+      langOpts.forEach(o => o.addEventListener('click', () => setLanguage(o.dataset.lang)));
+    });
+
+    // Cleanup listeners on page unload
+    window.addEventListener('beforeunload', () => { 
+      if(chatsListener) chatsListener(); 
+      if(messagesListener) messagesListener(); 
+    });
+  </script>
+</body>
+</html>
