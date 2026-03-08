@@ -1,0 +1,1528 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+  <title>GuraNeza · Shops – mobile with tabs</title>
+  <!-- Font Awesome 6 -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <!-- Google Fonts: Inter -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+    body { background: #f5f7fa; color: #131b2c; line-height: 1.5; min-height: 100vh; display: flex; flex-direction: column; }
+
+    /* === TOP BAR (logo, let's shop, drawer trigger) === */
+    .top-bar {
+      position: sticky; top: 0; z-index: 150;
+      background: rgba(255,255,255,0.92); backdrop-filter: blur(12px);
+      border-bottom: 1px solid rgba(0,0,0,0.02);
+      padding: 0.5rem 1rem;
+      display: flex; align-items: center; justify-content: space-between;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.02);
+    }
+    .logo-area { display: flex; align-items: center; gap: 0.3rem; }
+    .logo-icon { font-size: 1.6rem; color: #0f3b5c; }
+    .logo-text { font-weight: 700; font-size: 1.2rem; color: #131b2c; }
+    .logo-text span { color: #0f3b5c; background: #e1effa; padding: 0.15rem 0.4rem; border-radius: 30px; font-size: 0.7rem; margin-left: 0.2rem; }
+
+    .top-actions { display: flex; align-items: center; gap: 0.5rem; }
+    .letshop-btn {
+      width: 38px; height: 38px; border-radius: 50%; border: none;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.1rem; background: #ecf2f8; color: #0f3b5c; border: 1px solid #dae2ec;
+      cursor: pointer;
+    }
+    .drawer-trigger {
+      width: 38px; height: 38px; border-radius: 50%; border: none;
+      background: #0f3b5c; color: white; font-size: 1.2rem;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; box-shadow: 0 4px 8px rgba(15,59,92,0.15);
+    }
+
+    /* === SIDE DRAWER (cart, profile, options, logout, lang) === */
+    .drawer-overlay {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background-color: rgba(0,0,0,0.2); backdrop-filter: blur(3px);
+      z-index: 200; visibility: hidden; opacity: 0;
+      transition: opacity 0.2s ease, visibility 0.2s;
+    }
+    .drawer-overlay.active { visibility: visible; opacity: 1; }
+    .drawer {
+      position: fixed; top: 0; right: -280px; width: 260px; height: 100%;
+      background: white; box-shadow: -4px 0 20px rgba(0,0,0,0.1);
+      z-index: 250; padding: 1.5rem 1rem; transition: right 0.25s ease;
+      display: flex; flex-direction: column;
+    }
+    .drawer.active { right: 0; }
+    .drawer-header {
+      display: flex; align-items: center; gap: 0.8rem; margin-bottom: 1.8rem;
+      border-bottom: 1px solid #ecf2f8; padding-bottom: 1rem;
+    }
+    .drawer-profile-img {
+      width: 48px; height: 48px; border-radius: 50%; background: #e1effa;
+      display: flex; align-items: center; justify-content: center;
+      color: #0f3b5c; font-size: 1.6rem; border: 2px solid white;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.05); overflow: hidden;
+    }
+    .drawer-profile-img img { width: 100%; height: 100%; object-fit: cover; }
+    .drawer-profile-name { font-weight: 600; color: #1e3e5c; font-size: 0.95rem; }
+    .drawer-item {
+      display: flex; align-items: center; gap: 1rem; padding: 0.8rem 0.5rem;
+      color: #1e2a3a; text-decoration: none; font-size: 0.9rem; border-radius: 12px;
+      transition: background 0.1s; cursor: pointer;
+    }
+    .drawer-item i { width: 24px; color: #0f3b5c; font-size: 1.1rem; }
+    .drawer-item:hover { background: #f0f8ff; }
+    .drawer-divider { height: 1px; background: #ecf2f8; margin: 0.8rem 0; }
+    .drawer-cart-badge {
+      background: #0f3b5c; color: white; border-radius: 30px;
+      padding: 0.15rem 0.5rem; font-size: 0.7rem; margin-left: auto;
+    }
+    .close-drawer {
+      position: absolute; top: 1rem; left: 1rem; font-size: 1.4rem;
+      color: #8b9bb0; cursor: pointer;
+    }
+
+    /* === BOTTOM NAV (home, buy, sell, shops) === */
+    .bottom-nav {
+      position: fixed; bottom: 0; left: 0; width: 100%; z-index: 100;
+      background: rgba(255,255,255,0.92); backdrop-filter: blur(12px);
+      border-top: 1px solid #e6ecf3; display: flex; justify-content: space-around;
+      padding: 0.4rem 0.5rem; box-shadow: 0 -4px 10px rgba(0,0,0,0.02);
+    }
+    .nav-item {
+      display: flex; flex-direction: column; align-items: center; gap: 0.2rem;
+      color: #6f8faf; text-decoration: none; font-size: 0.7rem; padding: 0.2rem 0.5rem;
+      border-radius: 30px; transition: all 0.1s; flex: 1;
+    }
+    .nav-item i { font-size: 1.2rem; color: #6f8faf; }
+    .nav-item.active { color: #0f3b5c; font-weight: 500; }
+    .nav-item.active i { color: #0f3b5c; }
+
+    /* main content – add padding bottom for fixed nav */
+    .main-content {
+      flex: 1; max-width: 1280px; margin: 0 auto; padding: 1rem 1rem 5rem;
+      width: 100%;
+    }
+
+    /* Toast container */
+    .toast-container {
+      position: fixed; top: 70px; right: 10px; z-index: 300;
+      display: flex; flex-direction: column; gap: 6px; pointer-events: none;
+    }
+    .toast {
+      background: white; border-radius: 14px; box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+      padding: 10px 14px; min-width: 240px; max-width: 280px;
+      transform: translateX(120%); transition: transform 0.25s ease;
+      display: flex; align-items: center; gap: 10px; pointer-events: auto;
+      border-left: 4px solid #2ecc71;
+    }
+    .toast.show { transform: translateX(0); }
+    .toast-icon { width: 28px; height: 28px; border-radius: 50%; background: #2ecc71; display: flex; align-items: center; justify-content: center; color: white; font-size: 0.8rem; }
+    .toast-content { flex: 1; }
+    .toast-title { font-weight: 600; color: #1e293b; margin-bottom: 2px; font-size: 0.8rem; }
+    .toast-message { color: #64748b; font-size: 0.7rem; }
+    .toast-close { color: #94a3b8; cursor: pointer; font-size: 0.8rem; }
+    .toast.error { border-left-color: #ef4444; } .toast.error .toast-icon { background: #ef4444; }
+    .toast.warning { border-left-color: #f59e0b; } .toast.warning .toast-icon { background: #f59e0b; }
+
+    /* confirmation modal */
+    .confirm-modal {
+      display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%;
+      background-color: rgba(0,0,0,0.25); backdrop-filter: blur(3px); align-items: center; justify-content: center;
+    }
+    .confirm-modal.active { display: flex; }
+    .confirm-modal-content {
+      background: white; max-width: 340px; width: 85%; padding: 1.5rem; border-radius: 32px;
+      box-shadow: 0 30px 40px rgba(0,0,0,0.2); text-align: center;
+    }
+    .confirm-modal-content i { font-size: 2.2rem; color: #ef4444; margin-bottom: 0.8rem; }
+    .confirm-modal-content h3 { font-size: 1.3rem; color: #1e293b; margin-bottom: 0.5rem; }
+    .confirm-modal-content p { color: #64748b; margin-bottom: 1.2rem; font-size: 0.85rem; }
+    .confirm-actions { display: flex; gap: 0.8rem; justify-content: center; }
+    .confirm-btn {
+      padding: 0.5rem 1.4rem; border: none; border-radius: 40px; font-weight: 600;
+      font-size: 0.8rem; cursor: pointer; transition: 0.15s;
+    }
+    .confirm-btn.cancel { background: #f1f5f9; color: #475569; }
+    .confirm-btn.delete { background: #ef4444; color: white; }
+
+    /* loading spinner */
+    .loading-spinner { text-align: center; padding: 2rem; }
+    .spinner {
+      display: inline-block; width: 38px; height: 38px;
+      border: 3px solid #e2ecf5; border-radius: 50%;
+      border-top-color: #0f3b5c; animation: spin 0.8s ease infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* modal */
+    .modal {
+      display: none; position: fixed; z-index: 200; left: 0; top: 0; width: 100%; height: 100%;
+      background-color: rgba(0,0,0,0.2); backdrop-filter: blur(2px); align-items: center; justify-content: center;
+    }
+    .modal.active { display: flex; }
+    .modal-content {
+      background: white; max-width: 480px; width: 90%; padding: 1.5rem; border-radius: 32px;
+      box-shadow: 0 20px 30px rgba(0,0,0,0.15); position: relative; max-height: 85vh; overflow-y: auto;
+    }
+    .modal-content h3 { font-size: 1.3rem; color: #0f3b5c; margin-bottom: 1rem; display: flex; align-items: center; gap: 8px; }
+    .close-modal {
+      position: absolute; top: 1rem; right: 1.2rem; font-size: 1.6rem; cursor: pointer; color: #8b9bb0;
+    }
+
+    /* help modal specific */
+    #contactModal .modal-content { max-width: 360px; }
+    #contactModal p { margin: 0.6rem 0; display: flex; align-items: center; gap: 0.6rem; font-size: 0.9rem; }
+
+    /* ===== VISIBLE TABS for My Shop / All Shops ===== */
+    .shop-tabs {
+      display: flex; background: white; border-radius: 50px; padding: 0.3rem;
+      margin-bottom: 1.5rem; border: 1px solid #e2ecf5; gap: 0.3rem;
+    }
+    .shop-tab {
+      flex: 1; text-align: center; padding: 0.6rem 0.5rem; border-radius: 40px;
+      font-weight: 600; font-size: 0.8rem; cursor: pointer; transition: 0.15s;
+      color: #4a5b6b; background: transparent; border: none;
+    }
+    .shop-tab i { margin-right: 0.3rem; }
+    .shop-tab.active {
+      background: #0f3b5c; color: white; box-shadow: 0 4px 8px rgba(15,59,92,0.15);
+    }
+
+    /* page header + stats */
+    .page-header {
+      display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.2rem; flex-wrap: wrap; gap: 0.8rem;
+    }
+    .page-title { display: flex; align-items: center; gap: 8px; }
+    .page-title i { font-size: 1.6rem; color: #0f3b5c; background: white; padding: 8px; border-radius: 14px; }
+    .page-title h1 { font-size: 1.4rem; font-weight: 600; color: #0f2c40; }
+    .stats-cards { display: flex; gap: 0.5rem; }
+    .stat-card {
+      background: white; padding: 0.4rem 1rem; border-radius: 40px;
+      display: flex; align-items: center; gap: 6px; border: 1px solid #eef2f6;
+    }
+    .stat-card i { font-size: 0.9rem; color: #0f3b5c; }
+    .stat-info { display: flex; flex-direction: column; }
+    .stat-value { font-weight: 700; font-size: 0.9rem; color: #123456; }
+    .stat-label { font-size: 0.6rem; color: #6b89a5; }
+
+    /* form card */
+    .form-card {
+      background: white; border-radius: 28px; padding: 1.2rem;
+      border: 1px solid #eef2f6; box-shadow: 0 4px 12px rgba(0,0,0,0.02);
+    }
+    .form-title { font-size: 1.1rem; color: #0f3b5c; margin-bottom: 0.8rem; display: flex; align-items: center; gap: 6px; }
+    .form-grid { display: grid; grid-template-columns: 1fr; gap: 0.8rem; }
+    .form-group { margin-bottom: 0.8rem; }
+    .form-label {
+      display: flex; align-items: center; gap: 4px; font-weight: 500; color: #1e3e5c;
+      margin-bottom: 0.2rem; font-size: 0.75rem;
+    }
+    .form-label i { color: #0f3b5c; width: 16px; font-size: 0.75rem; }
+    .form-control {
+      width: 100%; padding: 0.5rem 0.8rem; border: 1.5px solid #e2ecf5;
+      border-radius: 40px; font-size: 0.8rem; transition: 0.15s;
+    }
+    .form-control:focus { border-color: #0f3b5c; outline: none; }
+    textarea.form-control { border-radius: 20px; min-height: 60px; }
+
+    /* image upload box */
+    .image-upload-box {
+      max-width: 220px; background: #f8fafd; border: 2px dashed #c9e0fa;
+      border-radius: 20px; padding: 0.8rem; text-align: center; cursor: pointer; position: relative;
+    }
+    .image-upload-box i { font-size: 1.4rem; color: #0f3b5c; margin-bottom: 0.2rem; }
+    .box-label { font-weight: 500; color: #1e3e5c; font-size: 0.7rem; }
+    .file-input { opacity: 0; position: absolute; top: 0; left: 0; width: 100%; height: 100%; cursor: pointer; }
+    .image-preview { width: 100%; height: 90px; border-radius: 12px; background-size: cover; background-position: center; margin-top: 0.3rem; border: 1px solid #e2ecf5; }
+
+    /* image grid for product images */
+    .image-grid { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+    .image-upload-box-small {
+      flex: 1; min-width: 70px; background: #f8fafd; border: 2px dashed #c9e0fa;
+      border-radius: 14px; padding: 0.4rem 0.2rem; text-align: center; cursor: pointer; position: relative;
+    }
+    .image-upload-box-small i { font-size: 1rem; color: #0f3b5c; margin-bottom: 0.1rem; }
+    .image-upload-box-small .box-label { font-size: 0.6rem; }
+    .image-preview-small { width: 100%; height: 40px; border-radius: 6px; background-size: cover; background-position: center; margin-top: 0.2rem; border: 1px solid #e2ecf5; }
+
+    /* submit button */
+    .submit-btn {
+      background: #0f3b5c; color: white; border: none; padding: 0.6rem 1.2rem;
+      font-size: 0.8rem; font-weight: 600; border-radius: 40px; cursor: pointer;
+      display: inline-flex; align-items: center; justify-content: center; gap: 0.4rem;
+      transition: 0.15s; margin-top: 0.3rem;
+    }
+
+    /* shop profile card */
+    .shop-profile-card {
+      background: white; border-radius: 28px; border: 1px solid #eef2f6; overflow: hidden; margin-bottom: 1.2rem;
+    }
+    .shop-poster {
+      width: 100%; height: 160px; background-size: cover; background-position: center; position: relative;
+      cursor: pointer; transition: 0.2s;
+    }
+    .shop-poster::before {
+      content: ''; position: absolute; inset: 0;
+      background: linear-gradient(to bottom, transparent 50%, rgba(0,0,0,0.4));
+    }
+    .shop-info-overlay {
+      position: absolute; bottom: 0.8rem; left: 1rem; right: 1rem;
+      color: white; display: flex; align-items: center; justify-content: space-between;
+    }
+    .shop-name-large { font-size: 1.3rem; font-weight: 700; text-shadow: 0 2px 4px rgba(0,0,0,0.3); }
+    .shop-verified-badge, .shop-unverified-badge {
+      padding: 0.2rem 0.8rem; border-radius: 40px; font-size: 0.7rem; font-weight: 600;
+      display: inline-flex; align-items: center; gap: 0.2rem; background: #2ecc71; color: white;
+    }
+    .shop-unverified-badge { background: #f59e0b; }
+    .view-shop-btn { background: rgba(255,255,255,0.2); backdrop-filter: blur(4px); padding: 0.2rem 0.8rem; border-radius: 40px; font-size: 0.7rem; cursor: pointer; border: 1px solid rgba(255,255,255,0.5); }
+    .shop-details-grid {
+      padding: 1rem; display: grid; grid-template-columns: repeat(2,1fr); gap: 0.8rem;
+      background: #f8fafd;
+    }
+    .shop-detail-item { display: flex; align-items: center; gap: 0.5rem; }
+    .shop-detail-item i {
+      width: 30px; height: 30px; background: white; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center; color: #0f3b5c;
+    }
+    .shop-detail-content { flex: 1; }
+    .shop-detail-label { font-size: 0.55rem; color: #6b89a5; text-transform: uppercase; }
+    .shop-detail-value { font-weight: 600; color: #1e293b; font-size: 0.75rem; }
+    .shop-actions {
+      padding: 0.6rem 1rem; display: flex; gap: 0.4rem; justify-content: flex-end; border-top: 1px solid #e2ecf5;
+    }
+    .shop-action-btn {
+      padding: 0.35rem 1rem; border: none; border-radius: 40px; font-weight: 500;
+      font-size: 0.7rem; cursor: pointer; display: inline-flex; align-items: center; gap: 0.3rem;
+    }
+    .shop-action-btn.edit { background: #e1effa; color: #0f3b5c; }
+    .shop-action-btn.verify { background: #fff4e5; color: #b85c00; }
+    .shop-action-btn.view { background: #0f3b5c; color: white; }
+
+    /* products section */
+    .products-section {
+      background: white; border-radius: 28px; padding: 1.2rem; border: 1px solid #eef2f6;
+    }
+    .section-header {
+      display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem;
+    }
+    .section-header h3 { color: #0f3b5c; display: flex; align-items: center; gap: 0.4rem; font-size: 1rem; }
+    .add-product-btn {
+      background: #0f3b5c; color: white; border: none; padding: 0.35rem 1rem;
+      border-radius: 40px; font-weight: 500; font-size: 0.7rem; cursor: pointer;
+    }
+    .products-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 0.8rem;
+    }
+    .product-card {
+      background: #f8fafd; border-radius: 20px; border: 1px solid #eef2f6; overflow: hidden;
+      transition: 0.15s; position: relative;
+    }
+    .product-card-image {
+      height: 120px; background-size: cover; background-position: center; position: relative;
+    }
+    .product-card-verified, .product-card-unverified {
+      position: absolute; top: 0.4rem; right: 0.4rem; background: #2ecc71; color: white;
+      padding: 0.1rem 0.5rem; border-radius: 30px; font-size: 0.55rem; display: flex; align-items: center; gap: 0.2rem;
+    }
+    .product-card-unverified { background: #f59e0b; }
+    .cart-image-btn {
+      position: absolute; bottom: 0.4rem; right: 0.4rem; background: white; border: none;
+      border-radius: 30px; padding: 0.2rem 0.6rem; font-size: 0.6rem; font-weight: 600; color: #0f3b5c;
+      display: flex; align-items: center; gap: 0.2rem; cursor: pointer; box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    }
+    .product-card-content { padding: 0.6rem; }
+    .product-card-name { font-weight: 600; color: #1e293b; font-size: 0.8rem; margin-bottom: 0.2rem; }
+    .product-card-price { font-weight: 700; color: #0f3b5c; font-size: 0.85rem; }
+    .product-card-price::after { content: ' RWF'; font-size: 0.6rem; font-weight: 400; color: #6b89a5; }
+    .product-card-negotiable { display: inline-block; background: #e6f2fa; border-radius: 30px; padding: 0.1rem 0.4rem; font-size: 0.55rem; color: #0f3b5c; margin: 0.2rem 0; }
+    .product-card-shop, .product-card-contact { display: flex; align-items: center; gap: 0.2rem; color: #64748b; font-size: 0.6rem; }
+    .product-card-actions { display: flex; gap: 0.3rem; margin-top: 0.4rem; }
+    .product-card-btn {
+      flex: 1; padding: 0.25rem; border: none; border-radius: 30px; font-size: 0.6rem; font-weight: 500; cursor: pointer;
+    }
+    .product-card-btn.edit { background: #e1effa; color: #0f3b5c; }
+    .product-card-btn.delete { background: #fee9e7; color: #c62828; }
+
+    /* shops grid (all shops) */
+    .shops-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1rem;
+    }
+    .shop-card {
+      background: white; border-radius: 24px; border: 1px solid #eef2f6; overflow: hidden;
+      cursor: pointer; transition: 0.15s;
+    }
+    .shop-card-poster {
+      height: 120px; background-size: cover; background-position: center; position: relative;
+    }
+    .shop-card-verified, .shop-card-unverified {
+      position: absolute; top: 0.5rem; right: 0.5rem; background: #2ecc71; color: white;
+      padding: 0.15rem 0.6rem; border-radius: 30px; font-size: 0.6rem; display: flex; align-items: center; gap: 0.2rem;
+    }
+    .shop-card-unverified { background: #f59e0b; }
+    .shop-card-content { padding: 0.8rem; }
+    .shop-card-name { font-weight: 600; color: #1e293b; margin-bottom: 0.2rem; font-size: 0.85rem; }
+    .shop-card-category { color: #0f3b5c; font-size: 0.65rem; margin-bottom: 0.2rem; }
+    .shop-card-description { color: #64748b; font-size: 0.65rem; margin-bottom: 0.4rem; line-height: 1.3; }
+    .shop-card-footer { display: flex; align-items: center; justify-content: space-between; border-top: 1px solid #eef2f6; padding-top: 0.5rem; }
+    .shop-card-location { color: #64748b; font-size: 0.6rem; display: flex; align-items: center; gap: 0.2rem; }
+    .shop-card-products { background: #e1effa; color: #0f3b5c; padding: 0.1rem 0.5rem; border-radius: 30px; font-size: 0.55rem; }
+
+    .empty-state { text-align: center; padding: 2rem; color: #6f8faf; }
+    .empty-state i { font-size: 2.5rem; color: #b5c9e0; margin-bottom: 0.5rem; }
+
+    /* footer */
+    footer {
+      background: #0f2c40; color: #cbdae6; margin-top: 1rem;
+      padding: 1.5rem 1rem 0.8rem; border-radius: 28px 28px 0 0;
+    }
+    .footer-content { display: flex; flex-direction: column; align-items: center; gap: 0.5rem; }
+    .social-only { display: flex; gap: 1.2rem; }
+    .social-only a { font-size: 1.5rem; color: #b0c6db; }
+    .copyright { text-align: center; font-size: 0.7rem; color: #98b1c9; margin-top: 1rem; border-top: 1px solid #1f4a6e; padding-top: 0.6rem; }
+  </style>
+</head>
+<body>
+  <!-- TOP BAR -->
+  <div class="top-bar">
+    <div class="logo-area">
+      <i class="fas fa-shopping-bag logo-icon"></i>
+      <div class="logo-text">GuraNeza<span>BuySmart</span></div>
+    </div>
+    <div class="top-actions">
+      <button class="letshop-btn" onclick="window.location.href='letshop.html'" title="Let's Shop"><i class="fas fa-shopping-bag"></i></button>
+      <button class="drawer-trigger" id="drawerTrigger"><i class="fas fa-bars"></i></button>
+    </div>
+  </div>
+
+  <!-- SIDE DRAWER (with language options) -->
+  <div class="drawer-overlay" id="drawerOverlay"></div>
+  <div class="drawer" id="drawer">
+    <div class="drawer-header">
+      <div class="drawer-profile-img" id="drawerProfileImg"><i class="fas fa-user-circle"></i></div>
+      <span class="drawer-profile-name" id="drawerProfileName">Guest</span>
+    </div>
+    <div class="drawer-item" id="drawerCart">
+      <i class="fas fa-shopping-basket"></i> <span data-i18n="myCart">My Cart</span> <span class="drawer-cart-badge" id="drawerCartCount">0</span>
+    </div>
+    <div class="drawer-item" id="drawerProfile">
+      <i class="fas fa-user"></i> <span data-i18n="profile">Profile</span>
+    </div>
+    <div class="drawer-item" id="drawerHelp">
+      <i class="fas fa-question-circle"></i> <span data-i18n="helpCenter">Help Center</span>
+    </div>
+    <div class="drawer-divider"></div>
+    <div class="drawer-item" id="drawerLogout">
+      <i class="fas fa-sign-out-alt"></i> <span data-i18n="logout">Logout</span>
+    </div>
+    <div class="drawer-divider"></div>
+    <!-- Language options - clicking changes UI -->
+    <div class="drawer-item lang-option" data-lang="en">
+      <i class="fas fa-language"></i> English
+    </div>
+    <div class="drawer-item lang-option" data-lang="fr">
+      <i class="fas fa-language"></i> Français
+    </div>
+    <div class="drawer-item lang-option" data-lang="rw">
+      <i class="fas fa-language"></i> Kinyarwanda
+    </div>
+    <div class="close-drawer" id="closeDrawerBtn"><i class="fas fa-times"></i></div>
+  </div>
+
+  <!-- BOTTOM NAV (home, buy, sell, shops) with i18n -->
+  <div class="bottom-nav">
+    <a href="home.html" class="nav-item" data-nav="home"><i class="fas fa-home"></i><span data-i18n="home">Home</span></a>
+    <a href="buy.html" class="nav-item" data-nav="buy"><i class="fas fa-shopping-cart"></i><span data-i18n="buy">Buy</span></a>
+    <a href="sell.html" class="nav-item" data-nav="sell"><i class="fas fa-plus-circle"></i><span data-i18n="sell">Sell</span></a>
+    <a href="shops.html" class="nav-item active" data-nav="shops"><i class="fas fa-store"></i><span data-i18n="shops">Shops</span></a>
+  </div>
+
+  <!-- toast container -->
+  <div id="toastContainer" class="toast-container"></div>
+
+  <!-- confirmation modal for delete -->
+  <div id="deleteConfirmModal" class="confirm-modal">
+    <div class="confirm-modal-content">
+      <i class="fas fa-exclamation-triangle"></i>
+      <h3 data-i18n="deleteProduct">Delete product?</h3>
+      <p id="deleteConfirmMessage" data-i18n="deleteConfirm">This action cannot be undone.</p>
+      <div class="confirm-actions">
+        <button class="confirm-btn cancel" id="cancelDeleteBtn"><span data-i18n="cancel">Cancel</span></button>
+        <button class="confirm-btn delete" id="confirmDeleteBtn"><span data-i18n="delete">Delete</span></button>
+      </div>
+    </div>
+  </div>
+
+  <!-- loading spinner overlay -->
+  <div id="loadingSpinner" class="loading-spinner" style="display: none;"><div class="spinner"></div><p style="margin-top:0.5rem;" data-i18n="loading">Loading...</p></div>
+
+  <!-- help modal -->
+  <div id="contactModal" class="modal">
+    <div class="modal-content">
+      <span class="close-modal" id="closeModalBtn">&times;</span>
+      <h3><i class="fas fa-question-circle"></i> <span data-i18n="helpCenter">Help Center</span></h3>
+      <p><i class="fas fa-envelope"></i> <a href="mailto:guraneza@gmail.com">guraneza@gmail.com</a></p>
+      <p><i class="fas fa-phone-alt"></i> +250 795583674</p>
+      <p><i class="fas fa-life-ring"></i> <a href="#" id="modalHelpCenter"><span data-i18n="faq">FAQ</span></a></p>
+      <p><i class="fab fa-tiktok"></i> <a href="#">@guraneza</a></p>
+    </div>
+  </div>
+
+  <!-- edit shop modal -->
+  <div id="editShopModal" class="modal">
+    <div class="modal-content">
+      <span class="close-modal" id="closeEditShopModal">&times;</span>
+      <h3><i class="fas fa-edit"></i> <span data-i18n="editShop">Edit Shop</span></h3>
+      <form id="editShopForm">
+        <input type="hidden" id="editShopId">
+        <input type="hidden" id="editShopFirebaseKey">
+        <div class="form-group"><label class="form-label"><i class="fas fa-store"></i> <span data-i18n="name">Name</span></label><input type="text" class="form-control" id="editShopName" required></div>
+        <div class="form-group"><label class="form-label"><i class="fas fa-align-left"></i> <span data-i18n="description">Description</span></label><textarea class="form-control" id="editShopDesc" rows="2" required></textarea></div>
+        <div class="form-group"><label class="form-label"><i class="fas fa-folder"></i> <span data-i18n="category">Category</span></label><select class="form-control" id="editShopCategory" required><option value="Electronics">Electronics</option><option value="Clothing">Clothing</option><option value="Furniture">Furniture</option><option value="Books">Books</option><option value="Food">Food</option><option value="Other">Other</option></select></div>
+        <div class="form-group"><label class="form-label"><i class="fas fa-map-marker-alt"></i> <span data-i18n="location">Location</span></label><input type="text" class="form-control" id="editShopLocation" required></div>
+        <div class="form-group"><label class="form-label"><i class="fas fa-phone"></i> <span data-i18n="phone">Phone</span></label><input type="tel" class="form-control" id="editShopPhone" required></div>
+        <div class="form-group"><label class="form-label"><i class="fas fa-envelope"></i> <span data-i18n="email">Email</span></label><input type="email" class="form-control" id="editShopEmail" required></div>
+        <div class="form-group"><label class="form-label"><i class="fas fa-id-card"></i> <span data-i18n="tin">TIN</span></label><input type="text" class="form-control" id="editShopTin" required></div>
+        <button type="button" class="submit-btn" id="saveShopEditBtn"><i class="fas fa-save"></i> <span data-i18n="saveChanges">Save Changes</span></button>
+      </form>
+    </div>
+  </div>
+
+  <!-- add/edit product modal - MODIFIED to use sell.html format -->
+  <div id="addProductModal" class="modal">
+    <div class="modal-content">
+      <span class="close-modal" id="closeAddProductModal">&times;</span>
+      <h3><i class="fas fa-box"></i> <span data-i18n="product">Product</span></h3>
+      <form id="shopProductForm">
+        <input type="hidden" id="editProductFirebaseKey">
+        
+        <!-- SELLER TYPE SELECTOR - New field -->
+        <div class="form-group">
+          <label class="form-label"><i class="fas fa-tag"></i> <span data-i18n="sellerType">Seller Type *</span></label>
+          <select class="form-control" id="sellerType" required>
+            <option value="shop" selected>Shop Sell</option>
+            <option value="account">Account Sell</option>
+          </select>
+        </div>
+        
+        <!-- SHOP INFO - Will be auto-filled when shop is selected -->
+        <div class="shop-info-fields">
+          <div class="form-group">
+            <label class="form-label"><i class="fas fa-store"></i> <span data-i18n="shopId">Shop ID</span></label>
+            <input type="text" class="form-control" id="shopId" value="${currentShop?.id || ''}" readonly>
+          </div>
+          <div class="form-group">
+            <label class="form-label"><i class="fas fa-store"></i> <span data-i18n="shopName">Shop Name</span></label>
+            <input type="text" class="form-control" id="shopName" value="${currentShop?.name || ''}" readonly>
+          </div>
+          <div class="form-group">
+            <label class="form-label"><i class="fas fa-phone"></i> <span data-i18n="shopPhone">Shop Phone</span></label>
+            <input type="text" class="form-control" id="shopPhone" value="${currentShop?.contact?.phone || ''}" readonly>
+          </div>
+          <div class="form-group">
+            <label class="form-label"><i class="fas fa-map-marker-alt"></i> <span data-i18n="shopLocation">Shop Location</span></label>
+            <input type="text" class="form-control" id="shopLocation" value="${currentShop?.location || ''}" readonly>
+          </div>
+        </div>
+        
+        <div class="form-group"><label class="form-label"><i class="fas fa-tag"></i> <span data-i18n="nameRequired">Name *</span></label><input type="text" class="form-control" id="shopProductName" required></div>
+        <div class="form-group"><label class="form-label"><i class="fas fa-folder"></i> <span data-i18n="categoryRequired">Category *</span></label><select class="form-control" id="shopProductCategory" required><option value="">Select</option><option value="Electronics">Electronics</option><option value="Clothing">Clothing</option><option value="Furniture">Furniture</option><option value="Books">Books</option><option value="Food">Food</option><option value="Other">Other</option></select></div>
+        <div class="form-group"><label class="form-label"><i class="fas fa-align-left"></i> <span data-i18n="descriptionRequired">Description *</span></label><textarea class="form-control" id="shopProductDesc" rows="2" required></textarea></div>
+        <div style="display:flex; align-items:center; gap:0.5rem; margin-bottom:0.8rem;"><input type="checkbox" id="shopProductNegociable"><span data-i18n="priceNegotiable">Negotiable</span></div>
+        <div class="form-group"><label class="form-label"><i class="fas fa-credit-card"></i> <span data-i18n="priceRequired">Price (RWF) *</span></label><input type="number" class="form-control" id="shopProductPrice" step="100" min="0" required></div>
+        
+        <div class="form-group"><label class="form-label"><i class="fas fa-camera"></i> <span data-i18n="productImages">Images (max 3)</span></label>
+          <div class="image-grid" id="productImageGrid">
+            <div class="image-upload-box-small"><i class="fas fa-cloud-upload-alt"></i><div class="box-label" data-i18n="image1">Image 1</div><input type="file" class="file-input" accept="image/*" data-index="0"><div class="image-preview-small" id="productPreview0"></div></div>
+            <div class="image-upload-box-small"><i class="fas fa-cloud-upload-alt"></i><div class="box-label" data-i18n="image2">Image 2</div><input type="file" class="file-input" accept="image/*" data-index="1"><div class="image-preview-small" id="productPreview1"></div></div>
+            <div class="image-upload-box-small"><i class="fas fa-cloud-upload-alt"></i><div class="box-label" data-i18n="image3">Image 3</div><input type="file" class="file-input" accept="image/*" data-index="2"><div class="image-preview-small" id="productPreview2"></div></div>
+          </div>
+        </div>
+        <button type="button" class="submit-btn" id="saveShopProductBtn"><i class="fas fa-check"></i> <span data-i18n="addProduct">Add Product</span></button>
+        <button type="button" class="submit-btn" id="updateShopProductBtn" style="display:none;"><i class="fas fa-save"></i> <span data-i18n="updateProduct">Update Product</span></button>
+      </form>
+    </div>
+  </div>
+
+  <!-- verification request modal -->
+  <div id="verifyRequestModal" class="modal">
+    <div class="modal-content">
+      <span class="close-modal" id="closeVerifyModal">&times;</span>
+      <h3><i class="fas fa-check-circle"></i> <span data-i18n="requestVerification">Request Verification</span></h3>
+      <p style="background:#f8fafd; padding:0.8rem; border-radius:16px; font-size:0.8rem;" data-i18n="verifyInfo">Your shop info will be reviewed by admin.</p>
+      <div class="form-group"><label class="form-label" data-i18n="shopName">Shop Name</label><input type="text" class="form-control" id="verifyShopName" readonly></div>
+      <div class="form-group"><label class="form-label" data-i18n="tin">TIN</label><input type="text" class="form-control" id="verifyShopTin" readonly></div>
+      <div class="form-group"><label class="form-label" data-i18n="phone">Phone</label><input type="text" class="form-control" id="verifyShopPhone" readonly></div>
+      <div class="form-group"><label class="form-label" data-i18n="email">Email</label><input type="email" class="form-control" id="verifyShopEmail" readonly></div>
+      <div class="form-group"><label class="form-label" data-i18n="location">Location</label><input type="text" class="form-control" id="verifyShopLocation" readonly></div>
+      <div class="form-group"><label class="form-label" data-i18n="description">Description</label><textarea class="form-control" id="verifyShopDesc" rows="2" readonly></textarea></div>
+      <div class="form-group"><label class="form-label" data-i18n="notesOptional">Notes (optional)</label><textarea class="form-control" id="verifyNotes" rows="2" placeholder="Any extra info..."></textarea></div>
+      <button type="button" class="submit-btn" id="submitVerifyRequestBtn"><i class="fas fa-paper-plane"></i> <span data-i18n="submit">Submit</span></button>
+    </div>
+  </div>
+
+  <!-- main content -->
+  <main class="main-content">
+    <!-- VISIBLE TABS to switch between My Shop and All Shops -->
+    <div class="shop-tabs">
+      <button class="shop-tab active" id="tabMyShop"><i class="fas fa-store-alt"></i> <span data-i18n="myShop">My Shop</span></button>
+      <button class="shop-tab" id="tabAllShops"><i class="fas fa-store"></i> <span data-i18n="allShops">All Shops</span></button>
+    </div>
+    <div class="shops-content" id="shopsContent">
+      <!-- dynamic content goes here -->
+      <div class="loading-spinner"><div class="spinner"></div><p data-i18n="loadingShops">Loading shops...</p></div>
+    </div>
+  </main>
+
+  <footer>
+    <div class="footer-content">
+      <div class="footer-brand"><p>© 2026 GuraNeza | BuySmart</p></div>
+      <div class="social-only"><a href="#"><i class="fab fa-tiktok"></i></a><a href="#"><i class="fab fa-youtube"></i></a><a href="#"><i class="fab fa-instagram"></i></a><a href="#"><i class="fab fa-twitter"></i></a></div>
+    </div>
+    <div class="copyright"><span data-i18n="footerTagline">Buy Smart, Sell Easy: @guraneza</span></div>
+  </footer>
+
+  <!-- Firebase SDK (modular) with translations -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getDatabase, ref, push, set, get, update, remove, query, orderByChild, equalTo } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyAr6-rTa8yQCxr41JjWysFLHeFxH0C2IMI",
+      authDomain: "guraneza-714f7.firebaseapp.com",
+      databaseURL: "https://guraneza-714f7-default-rtdb.firebaseio.com",
+      projectId: "guraneza-714f7",
+      storageBucket: "guraneza-714f7.firebasestorage.app",
+      messagingSenderId: "457107620336",
+      appId: "1:457107620336:web:1583db305b03528fcf5d35"
+    };
+    const app = initializeApp(firebaseConfig);
+    const database = getDatabase(app);
+    const auth = getAuth(app);
+
+    // ===== TRANSLATIONS (English, French, Kinyarwanda) =====
+    const translations = {
+      en: {
+        home: "Home",
+        buy: "Buy",
+        sell: "Sell",
+        shops: "Shops",
+        myCart: "My Cart",
+        profile: "Profile",
+        helpCenter: "Help Center",
+        logout: "Logout",
+        myShop: "My Shop",
+        allShops: "All Shops",
+        yourProducts: "Your Products",
+        conversations: "Conversations",
+        productID: "Product ID",
+        nameRequired: "Name *",
+        categoryRequired: "Category *",
+        descriptionRequired: "Description *",
+        priceNegotiable: "Negotiable",
+        priceRequired: "Price (RWF) *",
+        name: "Name",
+        phone: "Phone",
+        email: "Email",
+        location: "Location",
+        productImages: "Images (max 3)",
+        image1: "Image 1",
+        image2: "Image 2",
+        image3: "Image 3",
+        addProduct: "Add Product",
+        updateProduct: "Update Product",
+        editShop: "Edit Shop",
+        category: "Category",
+        description: "Description",
+        tin: "TIN",
+        saveChanges: "Save Changes",
+        product: "Product",
+        shop: "Shop",
+        requestVerification: "Request Verification",
+        verifyInfo: "Your shop info will be reviewed by admin.",
+        notesOptional: "Notes (optional)",
+        submit: "Submit",
+        deleteProduct: "Delete product?",
+        deleteConfirm: "This action cannot be undone.",
+        cancel: "Cancel",
+        delete: "Delete",
+        loading: "Loading...",
+        loadingShops: "Loading shops...",
+        faq: "FAQ",
+        footerTagline: "Buy Smart, Sell Easy: @guraneza",
+        noShops: "No shops",
+        noProducts: "No products yet",
+        total: "Total",
+        verified: "Verified",
+        unverified: "Unverified",
+        view: "View",
+        edit: "Edit",
+        createShop: "Create Your Shop",
+        oneShopPerAccount: "One shop per account.",
+        shopId: "Shop ID",
+        posterImage: "Poster Image *",
+        upload: "Upload",
+        createShopBtn: "Create Shop",
+        select: "Select",
+        notProvided: "Not provided",
+        guest: "Guest",
+        sellerType: "Seller Type",
+        accountSell: "Account Sell",
+        shopSell: "Shop Sell",
+        productRegistered: "registered successfully!",
+        pleaseFillAll: "Please fill all required fields",
+        errorRegistering: "Error registering product"
+      },
+      fr: {
+        home: "Accueil",
+        buy: "Acheter",
+        sell: "Vendre",
+        shops: "Boutiques",
+        myCart: "Mon Panier",
+        profile: "Profil",
+        helpCenter: "Centre d'aide",
+        logout: "Déconnexion",
+        myShop: "Ma Boutique",
+        allShops: "Toutes les Boutiques",
+        yourProducts: "Vos Produits",
+        conversations: "Conversations",
+        productID: "ID Produit",
+        nameRequired: "Nom *",
+        categoryRequired: "Catégorie *",
+        descriptionRequired: "Description *",
+        priceNegotiable: "Négociable",
+        priceRequired: "Prix (RWF) *",
+        name: "Nom",
+        phone: "Téléphone",
+        email: "Email",
+        location: "Emplacement",
+        productImages: "Images (max 3)",
+        image1: "Image 1",
+        image2: "Image 2",
+        image3: "Image 3",
+        addProduct: "Ajouter Produit",
+        updateProduct: "Modifier Produit",
+        editShop: "Modifier Boutique",
+        category: "Catégorie",
+        description: "Description",
+        tin: "NIF",
+        saveChanges: "Enregistrer",
+        product: "Produit",
+        shop: "Boutique",
+        requestVerification: "Demander Vérification",
+        verifyInfo: "Les infos seront examinées par l'admin.",
+        notesOptional: "Notes (optionnel)",
+        submit: "Envoyer",
+        deleteProduct: "Supprimer produit?",
+        deleteConfirm: "Action irréversible.",
+        cancel: "Annuler",
+        delete: "Supprimer",
+        loading: "Chargement...",
+        loadingShops: "Chargement des boutiques...",
+        faq: "FAQ",
+        footerTagline: "Achetez malin, vendez facile: @guraneza",
+        noShops: "Aucune boutique",
+        noProducts: "Aucun produit",
+        total: "Total",
+        verified: "Vérifié",
+        unverified: "Non vérifié",
+        view: "Voir",
+        edit: "Modifier",
+        createShop: "Créer votre boutique",
+        oneShopPerAccount: "Une boutique par compte.",
+        shopId: "ID Boutique",
+        posterImage: "Image d'en-tête *",
+        upload: "Télécharger",
+        createShopBtn: "Créer Boutique",
+        select: "Sélectionner",
+        notProvided: "Non fourni",
+        guest: "Invité",
+        sellerType: "Type de vendeur",
+        accountSell: "Vente compte",
+        shopSell: "Vente boutique",
+        productRegistered: "enregistré avec succès!",
+        pleaseFillAll: "Veuillez remplir tous les champs",
+        errorRegistering: "Erreur lors de l'enregistrement"
+      },
+      rw: {
+        home: "Ahabanza",
+        buy: "Kugura",
+        sell: "Kugurisha",
+        shops: "Amaduka",
+        myCart: "Igikari cyanjye",
+        profile: "Umwirondoro",
+        helpCenter: "Ubufasha",
+        logout: "Sohoka",
+        myShop: "Iduka ryanjye",
+        allShops: "Amaduka yose",
+        yourProducts: "Ibicuruzwa byawe",
+        conversations: "Ikiganiro",
+        productID: "ID Igicuruzwa",
+        nameRequired: "Izina *",
+        categoryRequired: "Icyiciro *",
+        descriptionRequired: "Ibisobanuro *",
+        priceNegotiable: "Birahuzwa",
+        priceRequired: "Igiciro (RWF) *",
+        name: "Izina",
+        phone: "Telefone",
+        email: "Imeri",
+        location: "Aho uherereye",
+        productImages: "Amashusho (max 3)",
+        image1: "Ifoto 1",
+        image2: "Ifoto 2",
+        image3: "Ifoto 3",
+        addProduct: "Ongera Igicuruzwa",
+        updateProduct: "Hindura Igicuruzwa",
+        editShop: "Hindura Iduka",
+        category: "Icyiciro",
+        description: "Ibisobanuro",
+        tin: "TIN",
+        saveChanges: "Bika",
+        product: "Igicuruzwa",
+        shop: "Iduka",
+        requestVerification: "Saba Kugenzurwa",
+        verifyInfo: "Amakuru yawe azagenzurwa na admin.",
+        notesOptional: "Inyandiko (bishatse)",
+        submit: "Ohereza",
+        deleteProduct: "Gusiba igicuruzwa?",
+        deleteConfirm: "Ibi ntibishobora guhindurwa.",
+        cancel: "Guhagarika",
+        delete: "Siba",
+        loading: "Birabika...",
+        loadingShops: "Birabika amaduka...",
+        faq: "FAQ",
+        footerTagline: "Gura neza, gurisha byoroshye: @guraneza",
+        noShops: "Nta maduka",
+        noProducts: "Nta bicuruzwa",
+        total: "Yose",
+        verified: "Byagenzuwe",
+        unverified: "Ntibyagenzuwe",
+        view: "Reba",
+        edit: "Hindura",
+        createShop: "Tangiza iduka ryawe",
+        oneShopPerAccount: "Iduka rimwe gusa kuri konti.",
+        shopId: "ID Iduka",
+        posterImage: "Ifoto nyamukuru *",
+        upload: "Ohereza",
+        createShopBtn: "Tangiza Iduka",
+        select: "Hitamo",
+        notProvided: "Ntibitangwa",
+        guest: "Umushyitsi",
+        sellerType: "Ubwoko bw'umugurisha",
+        accountSell: "Kugurisha ku konti",
+        shopSell: "Kugurisha mu iduka",
+        productRegistered: "cyanditswe neza!",
+        pleaseFillAll: "Uzuza ibisabwa byose",
+        errorRegistering: "Ikosa ry'iyandikisha"
+      }
+    };
+
+    let currentLang = localStorage.getItem('guraneza_lang') || 'en';
+
+    // Translation function
+    function t(key) {
+      return translations[currentLang]?.[key] || translations.en[key] || key;
+    }
+
+    // Update all text on the page
+    function updateLanguage() {
+      document.querySelectorAll('[data-i18n]').forEach(el => {
+        const key = el.getAttribute('data-i18n');
+        el.textContent = t(key);
+      });
+
+      document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+        const key = el.getAttribute('data-i18n-placeholder');
+        el.placeholder = t(key);
+      });
+
+      document.querySelectorAll('.lang-option').forEach(opt => {
+        opt.classList.toggle('active', opt.dataset.lang === currentLang);
+      });
+
+      const categorySelects = document.querySelectorAll('select option[value=""]');
+      categorySelects.forEach(opt => {
+        if (opt.value === "") {
+          opt.textContent = t('select');
+        }
+      });
+
+      const tabMyShopSpan = document.querySelector('#tabMyShop span');
+      const tabAllShopsSpan = document.querySelector('#tabAllShops span');
+      if (tabMyShopSpan) tabMyShopSpan.textContent = t('myShop');
+      if (tabAllShopsSpan) tabAllShopsSpan.textContent = t('allShops');
+
+      renderCurrentTab();
+    }
+
+    // --- globals ---
+    let currentUser = null, userProfile = null, shops = [], products = [], verifyRequests = [];
+    let currentShopTab = 'my-shop';
+    let currentShop = null, productImageUrls = [null,null,null], editingProduct = null;
+    let productToDelete = null;
+
+    // DOM elements
+    const profileImg = document.getElementById('drawerProfileImg');
+    const profileName = document.getElementById('drawerProfileName');
+    const cartCountSpan = document.getElementById('drawerCartCount');
+    const loadingSpinner = document.getElementById('loadingSpinner');
+    const shopsContent = document.getElementById('shopsContent');
+    const tabMyShop = document.getElementById('tabMyShop');
+    const tabAllShops = document.getElementById('tabAllShops');
+
+    // --- toast helper ---
+    function showToast(message, type = 'success', duration = 2800) {
+      const container = document.getElementById('toastContainer');
+      const toast = document.createElement('div'); toast.className = `toast ${type}`;
+      const icons = { success:'fa-check-circle', error:'fa-exclamation-circle', warning:'fa-exclamation-triangle' };
+      const titles = { success:'Success', error:'Error', warning:'Warning' };
+      toast.innerHTML = `
+        <div class="toast-icon"><i class="fas ${icons[type]}"></i></div>
+        <div class="toast-content"><div class="toast-title">${titles[type]}</div><div class="toast-message">${message}</div></div>
+        <div class="toast-close" onclick="this.parentElement.remove()"><i class="fas fa-times"></i></div>
+      `;
+      container.appendChild(toast);
+      setTimeout(()=>toast.classList.add('show'),10);
+      setTimeout(()=>{ toast.classList.remove('show'); setTimeout(()=>toast.remove(),200); }, duration);
+    }
+
+    // --- delete confirmation modal ---
+    function showDeleteConfirmation(productName) {
+      return new Promise((resolve) => {
+        const modal = document.getElementById('deleteConfirmModal');
+        document.getElementById('deleteConfirmMessage').textContent = `${t('deleteConfirm')} "${productName}"?`;
+        const confirmBtn = document.getElementById('confirmDeleteBtn');
+        const cancelBtn = document.getElementById('cancelDeleteBtn');
+        const closeModal = () => { modal.classList.remove('active'); confirmBtn.removeEventListener('click',confirmHandler); cancelBtn.removeEventListener('click',cancelHandler); };
+        const confirmHandler = () => { closeModal(); resolve(true); };
+        const cancelHandler = () => { closeModal(); resolve(false); };
+        confirmBtn.addEventListener('click', confirmHandler);
+        cancelBtn.addEventListener('click', cancelHandler);
+        modal.classList.add('active');
+      });
+    }
+
+    // --- loading ---
+    function setLoading(isLoading) { loadingSpinner.style.display = isLoading ? 'block' : 'none'; }
+
+    // --- update profile in drawer ---
+    function updateProfileSection() {
+      if(currentUser && userProfile) {
+        profileName.textContent = userProfile.displayName || currentUser.email?.split('@')[0] || t('guest');
+        if(userProfile.profileImage) profileImg.innerHTML = `<img src="${userProfile.profileImage}" alt="">`;
+        else profileImg.innerHTML = '<i class="fas fa-user-circle"></i>';
+      } else { 
+        profileName.textContent = t('guest'); 
+        profileImg.innerHTML = '<i class="fas fa-user-circle"></i>'; 
+      }
+    }
+
+    // --- cart count ---
+    async function updateCartCount() {
+      if(!currentUser) { cartCountSpan.textContent='0'; return; }
+      try { const snap = await get(ref(database, `carts/${currentUser.uid}`)); cartCountSpan.textContent = snap.exists() ? Object.keys(snap.val()).length : '0'; } catch { cartCountSpan.textContent='0'; }
+    }
+
+    // --- add to cart (global) ---
+    window.addToCart = async function(productId, event) {
+      if(event) event.stopPropagation();
+      const product = products.find(p=>p.id===productId);
+      if(!product) return showToast(t('productNotFound') || 'Product not found','error');
+      if(!currentUser) { showToast(t('pleaseLogin') || 'Please log in','warning'); setTimeout(()=> window.location.href='index.html',1200); return; }
+      setLoading(true);
+      try {
+        const userCartRef = ref(database, `carts/${currentUser.uid}`);
+        const snap = await get(userCartRef);
+        let exists = false;
+        if(snap.exists()) for(const item of Object.values(snap.val())) if(item.id===productId) { exists=true; break; }
+        if(!exists) {
+          const cartItem = { id:product.id, name:product.name, price:parseFloat(product.price)||0, addedAt:new Date().toISOString(), category:product.category||'', description:product.description||'', shopId:product.shopId||'', shopName:product.shopName||'', verified:product.verified||false, negociable:product.negociable||false };
+          if(product.images?.length) { cartItem.images={}; product.images.forEach((img,i)=>{ if(img) cartItem.images[`image${i+1}`]=img; }); }
+          await set(push(userCartRef), cartItem);
+          await updateCartCount();
+          showToast(`${product.name} ${t('addedToCart') || 'added to cart'}`);
+        } else showToast(`${product.name} ${t('alreadyInCart') || 'already in cart'}`,'warning');
+      } catch(err) { showToast(t('errorAddToCart') || 'Error adding to cart','error'); } finally { setLoading(false); }
+    };
+
+    // --- load user profile ---
+    async function loadUserProfile() {
+      if(!currentUser) return;
+      try { const snap = await get(ref(database, `users/${currentUser.uid}`)); if(snap.exists()) userProfile = snap.val(); else userProfile = { uid:currentUser.uid, email:currentUser.email, displayName:currentUser.email?.split('@')[0]||t('guest') }; } catch { userProfile=null; }
+    }
+
+    // --- load shops ---
+    async function loadShops() {
+      setLoading(true);
+      try {
+        const snap = await get(ref(database, 'shops'));
+        if(snap.exists()) {
+          shops = Object.entries(snap.val()).map(([k,v])=>({ 
+            firebaseKey:k, 
+            id:v.shopId||k, 
+            name:v.name||'', 
+            description:v.description||'', 
+            category:v.category||'Other', 
+            location:v.location||'', 
+            contact:v.contact||{phone:'',email:''}, 
+            tin:v.tin||'', 
+            verified:v.verified||false, 
+            posterImage:v.posterImage||'', 
+            createdBy:v.createdBy||'', 
+            createdByEmail:v.createdByEmail||'', 
+            createdAt:v.createdAt||new Date().toISOString() 
+          }));
+          if(currentUser) currentShop = shops.find(s=>s.createdByEmail===currentUser.email);
+        } else { shops=[]; currentShop=null; }
+        renderCurrentTab();
+      } catch(e) { showToast(t('errorLoading') || 'Error loading shops','error'); } finally { setLoading(false); }
+    }
+
+    // --- load products ---
+    async function loadProducts() {
+      try {
+        const snap = await get(ref(database, 'products'));
+        if(snap.exists()) {
+          products = Object.entries(snap.val()).map(([k,p])=>{
+            const images = []; if(p.image1) images.push(p.image1); if(p.image2) images.push(p.image2); if(p.image3) images.push(p.image3);
+            return { 
+              firebaseKey:k, 
+              id:p.productId||k, 
+              name:p.name||'', 
+              category:p.category||'', 
+              description:p.description||'', 
+              negociable:p.negotiable||false, 
+              verified:p.verified||false, 
+              price:p.price||0, 
+              images, 
+              shopId:p.shopId||'', 
+              shopName:p.shopName||'', 
+              shopPhone:p.shopPhone||'', 
+              shopLocation:p.shopLocation||'', 
+              sellerName:p.sellerName||'',
+              sellerPhone:p.sellerPhone||'',
+              sellerEmail:p.sellerEmail||'',
+              sellerLocation:p.sellerLocation||'',
+              postedBy:p.postedBy||'', 
+              postedByEmail:p.postedByEmail||'',
+              sellerType:p.sellerType||'shop',
+              timestamp:p.timestamp||new Date().toISOString() 
+            };
+          });
+        } else products=[];
+        renderCurrentTab();
+      } catch(e) { showToast(t('errorLoading') || 'Error loading products','error'); }
+    }
+
+    // --- tab switching ---
+    function setActiveTab(tab) {
+      if(tab === 'my-shop') {
+        tabMyShop.classList.add('active');
+        tabAllShops.classList.remove('active');
+        currentShopTab = 'my-shop';
+      } else {
+        tabAllShops.classList.add('active');
+        tabMyShop.classList.remove('active');
+        currentShopTab = 'all-shops';
+      }
+      renderCurrentTab();
+    }
+
+    tabMyShop.addEventListener('click', () => setActiveTab('my-shop'));
+    tabAllShops.addEventListener('click', () => setActiveTab('all-shops'));
+
+    function renderCurrentTab() {
+      if(currentShopTab === 'my-shop') renderMyShop();
+      else renderAllShops();
+    }
+
+    // --- generate ids ---
+    function generateShopId() { return 'SHOP-'+Date.now().toString().slice(-6); }
+    function generateProductId() { return 'PROD-'+Date.now().toString().slice(-6) + '-' + Math.random().toString(36).substr(2, 4).toUpperCase(); }
+
+    // --- render my shop ---
+    function renderMyShop() {
+      if(!currentShop) {
+        shopsContent.innerHTML = `
+          <div class="form-card">
+            <div class="form-title"><i class="fas fa-store"></i> ${t('createShop')}</div>
+            <p style="color:#64748b; margin-bottom:0.8rem;">${t('oneShopPerAccount')}</p>
+            <form id="createShopForm">
+              <div class="form-group"><label class="form-label"><i class="fas fa-barcode"></i> ${t('shopId')}</label><input type="text" class="form-control" id="newShopId" readonly value="${generateShopId()}"></div>
+              <div class="form-group"><label class="form-label"><i class="fas fa-store"></i> ${t('nameRequired')}</label><input type="text" class="form-control" id="newShopName" required></div>
+              <div class="form-group"><label class="form-label"><i class="fas fa-align-left"></i> ${t('descriptionRequired')}</label><textarea class="form-control" id="newShopDesc" rows="2" required></textarea></div>
+              <div class="form-group"><label class="form-label"><i class="fas fa-folder"></i> ${t('categoryRequired')}</label><select class="form-control" id="newShopCategory" required><option value="">${t('select')}</option><option value="Electronics">Electronics</option><option value="Clothing">Clothing</option><option value="Furniture">Furniture</option><option value="Books">Books</option><option value="Food">Food</option><option value="Other">Other</option></select></div>
+              <div class="form-group"><label class="form-label"><i class="fas fa-map-marker-alt"></i> ${t('location')} *</label><input type="text" class="form-control" id="newShopLocation" required></div>
+              <div class="form-group"><label class="form-label"><i class="fas fa-phone"></i> ${t('phone')} *</label><input type="tel" class="form-control" id="newShopPhone" required></div>
+              <div class="form-group"><label class="form-label"><i class="fas fa-envelope"></i> ${t('email')} *</label><input type="email" class="form-control" id="newShopEmail" required></div>
+              <div class="form-group"><label class="form-label"><i class="fas fa-id-card"></i> ${t('tin')} *</label><input type="text" class="form-control" id="newShopTin" required></div>
+              <div class="form-group"><label class="form-label"><i class="fas fa-camera"></i> ${t('posterImage')}</label><div class="image-upload-box" id="shopPosterBox"><i class="fas fa-cloud-upload-alt"></i><div class="box-label">${t('upload')}</div><input type="file" class="file-input" id="shopPosterInput" accept="image/*" required><div class="image-preview" id="shopPosterPreview"></div></div></div>
+              <button type="button" class="submit-btn" id="createShopBtn"><i class="fas fa-check"></i> ${t('createShopBtn')}</button>
+            </form>
+          </div>`;
+        setupShopCreation();
+        return;
+      }
+      const shopProducts = products.filter(p=>p.shopId===currentShop.id);
+      shopsContent.innerHTML = `
+        <div class="shop-profile-card">
+          <div class="shop-poster" style="background-image:url('${currentShop.posterImage||'https://images.unsplash.com/photo-1557683311-eac922347aa1?w=1200&auto=format'}')" onclick="window.goToLetsShop('${currentShop.id}')">
+            <div class="shop-info-overlay"><span class="shop-name-large">${currentShop.name}</span><div style="display:flex; gap:0.5rem;">${currentShop.verified?'<span class="shop-verified-badge"><i class="fas fa-check-circle"></i> '+t('verified')+'</span>':'<span class="shop-unverified-badge"><i class="fas fa-times-circle"></i> '+t('unverified')+'</span>'}<span class="view-shop-btn"><i class="fas fa-store"></i>view</span></div></div>
+          </div>
+          <div class="shop-details-grid">
+            <div class="shop-detail-item"><i class="fas fa-id-card"></i><div class="shop-detail-content"><div class="shop-detail-label">${t('shopId')}</div><div class="shop-detail-value">${currentShop.id}</div></div></div>
+            <div class="shop-detail-item"><i class="fas fa-folder"></i><div class="shop-detail-content"><div class="shop-detail-label">${t('category')}</div><div class="shop-detail-value">${currentShop.category}</div></div></div>
+            <div class="shop-detail-item"><i class="fas fa-map-marker-alt"></i><div class="shop-detail-content"><div class="shop-detail-label">${t('location')}</div><div class="shop-detail-value">${currentShop.location}</div></div></div>
+            <div class="shop-detail-item"><i class="fas fa-phone"></i><div class="shop-detail-content"><div class="shop-detail-label">${t('phone')}</div><div class="shop-detail-value">${currentShop.contact.phone}</div></div></div>
+            <div class="shop-detail-item"><i class="fas fa-envelope"></i><div class="shop-detail-content"><div class="shop-detail-label">${t('email')}</div><div class="shop-detail-value">${currentShop.contact.email}</div></div></div>
+            <div class="shop-detail-item"><i class="fas fa-id-card"></i><div class="shop-detail-content"><div class="shop-detail-label">${t('tin')}</div><div class="shop-detail-value">${currentShop.tin}</div></div></div>
+          </div>
+          <div class="shop-actions">
+            <button class="shop-action-btn edit" onclick="window.openEditShopModal()"><i class="fas fa-edit"></i> ${t('edit')}</button>
+            <button class="shop-action-btn view" onclick="window.goToLetsShop('${currentShop.id}')"><i class="fas fa-store"></i> ${t('view')}</button>
+            ${!currentShop.verified?'<button class="shop-action-btn verify" onclick="window.openVerifyRequestModal()"><i class="fas fa-check-circle"></i> '+t('requestVerification')+'</button>':''}
+          </div>
+        </div>
+        <div class="products-section">
+          <div class="section-header"><h3><i class="fas fa-box"></i> ${t('products') || 'Products'} (${shopProducts.length})</h3><button class="add-product-btn" onclick="window.openAddProductModal()"><i class="fas fa-plus"></i> ${t('addProduct')}</button></div>
+          ${shopProducts.length?`<div class="products-grid">${shopProducts.map(p=>`
+            <div class="product-card">
+              <div class="product-card-image" style="background-image:url('${p.images?.[0]||'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400&auto=format'}')">
+                ${p.verified?'<span class="product-card-verified"><i class="fas fa-check-circle"></i> '+t('verified')+'</span>':'<span class="product-card-unverified"><i class="fas fa-times-circle"></i> '+t('unverified')+'</span>'}
+                <button class="cart-image-btn" onclick="addToCart('${p.id}', event)"><i class="fas fa-shopping-cart"></i> ${t('add') || 'Add'}</button>
+              </div>
+              <div class="product-card-content">
+                <div class="product-card-name">${p.name}</div>
+                <div class="product-card-price">${p.price.toLocaleString()}</div>
+                ${p.negociable?'<span class="product-card-negotiable">'+t('priceNegotiable')+'</span>':''}
+                <div class="product-card-shop"><i class="fas fa-store"></i> ${p.shopName || p.sellerName}</div>
+                <div class="product-card-contact"><i class="fas fa-phone"></i> ${p.shopPhone || p.sellerPhone || t('notProvided')}</div>
+                <div class="product-card-actions">
+                  <button class="product-card-btn edit" onclick="window.editShopProduct('${p.id}')"><i class="fas fa-edit"></i> ${t('edit')}</button>
+                  <button class="product-card-btn delete" onclick="window.deleteShopProduct('${p.id}', '${p.name}')"><i class="fas fa-trash"></i> ${t('delete')}</button>
+                </div>
+              </div>
+            </div>`).join('')}</div>`:`<div class="empty-state"><i class="fas fa-box-open"></i><h4>${t('noProducts')}</h4></div>`}
+        </div>`;
+    }
+
+    // --- render all shops ---
+    function renderAllShops() {
+      const sorted = [...shops].sort((a,b)=> (a.verified===b.verified?0:a.verified?-1:1));
+      if(!sorted.length) { shopsContent.innerHTML=`<div class="empty-state"><i class="fas fa-store-slash"></i><h3>${t('noShops')}</h3></div>`; return; }
+      shopsContent.innerHTML = `
+        <div class="page-header"><div class="page-title"><i class="fas fa-store"></i><h1>${t('allShops')}</h1></div><div class="stats-cards"><div class="stat-card"><i class="fas fa-store"></i><div class="stat-info"><span class="stat-value">${shops.length}</span><span class="stat-label">${t('total')}</span></div></div><div class="stat-card"><i class="fas fa-check-circle"></i><div class="stat-info"><span class="stat-value">${shops.filter(s=>s.verified).length}</span><span class="stat-label">${t('verified')}</span></div></div></div></div>
+        <div class="shops-grid">${sorted.map(s=>{
+          const cnt = products.filter(p=>p.shopId===s.id).length;
+          return `<div class="shop-card" onclick="window.goToLetsShop('${s.id}')"><div class="shop-card-poster" style="background-image:url('${s.posterImage||'https://images.unsplash.com/photo-1557683311-eac922347aa1?w=400&auto=format'}')">${s.verified?'<span class="shop-card-verified"><i class="fas fa-check-circle"></i> '+t('verified')+'</span>':'<span class="shop-card-unverified"><i class="fas fa-times-circle"></i> '+t('unverified')+'</span>'}</div><div class="shop-card-content"><h4 class="shop-card-name">${s.name}</h4><div class="shop-card-category"><i class="fas fa-folder"></i> ${s.category}</div><p class="shop-card-description">${s.description.substring(0,60)}...</p><div class="shop-card-footer"><span class="shop-card-location"><i class="fas fa-map-marker-alt"></i> ${s.location}</span><span class="shop-card-products"><i class="fas fa-box"></i> ${cnt}</span></div></div></div>`}).join('')}</div>`;
+    }
+
+    window.goToLetsShop = (id)=> window.location.href = `letshop.html?shop=${id}`;
+
+    // --- shop creation ---
+    function setupShopCreation() {
+      let posterImageUrl = null;
+      const posterInput = document.getElementById('shopPosterInput');
+      const posterPreview = document.getElementById('shopPosterPreview');
+      posterInput.addEventListener('change', e=>{
+        const file = e.target.files[0]; if(!file) { posterPreview.style.backgroundImage=''; posterImageUrl=null; return; }
+        const reader = new FileReader(); reader.onload = ev=> { posterImageUrl = ev.target.result; posterPreview.style.backgroundImage=`url('${ev.target.result}')`; }; reader.readAsDataURL(file);
+      });
+      document.getElementById('createShopBtn')?.addEventListener('click', async ()=>{
+        const name = document.getElementById('newShopName').value.trim();
+        const desc = document.getElementById('newShopDesc').value.trim();
+        const cat = document.getElementById('newShopCategory').value;
+        const loc = document.getElementById('newShopLocation').value.trim();
+        const phone = document.getElementById('newShopPhone').value.trim();
+        const email = document.getElementById('newShopEmail').value.trim();
+        const tin = document.getElementById('newShopTin').value.trim();
+        if(!name||!desc||!cat||!loc||!phone||!email||!tin||!posterImageUrl) { showToast(t('pleaseFillAll') || 'Please fill all fields','error'); return; }
+        setLoading(true);
+        try {
+          const shopId = generateShopId(); const newShopRef = push(ref(database,'shops'));
+          const newShop = { shopId, name, description:desc, category:cat, location:loc, contact:{phone,email}, tin, verified:false, posterImage:posterImageUrl, createdBy:currentUser.uid, createdByEmail:currentUser.email, createdAt:new Date().toISOString() };
+          await set(newShopRef, newShop);
+          shops.push({ firebaseKey:newShopRef.key, ...newShop }); 
+          currentShop = shops[shops.length-1];
+          showToast(t('shopCreated') || 'Shop created!'); 
+          renderCurrentTab();
+        } catch(e) { showToast(t('errorCreatingShop') || 'Error creating shop','error'); } finally { setLoading(false); }
+      });
+    }
+
+    // --- edit shop modal ---
+    window.openEditShopModal = function() {
+      if(!currentShop) return;
+      document.getElementById('editShopId').value = currentShop.id;
+      document.getElementById('editShopFirebaseKey').value = currentShop.firebaseKey;
+      document.getElementById('editShopName').value = currentShop.name;
+      document.getElementById('editShopDesc').value = currentShop.description;
+      document.getElementById('editShopCategory').value = currentShop.category;
+      document.getElementById('editShopLocation').value = currentShop.location;
+      document.getElementById('editShopPhone').value = currentShop.contact.phone;
+      document.getElementById('editShopEmail').value = currentShop.contact.email;
+      document.getElementById('editShopTin').value = currentShop.tin;
+      document.getElementById('editShopModal').classList.add('active');
+    };
+    document.getElementById('saveShopEditBtn')?.addEventListener('click', async ()=>{
+      const fkey = document.getElementById('editShopFirebaseKey').value;
+      setLoading(true);
+      try {
+        const updates = { name:document.getElementById('editShopName').value.trim(), description:document.getElementById('editShopDesc').value.trim(), category:document.getElementById('editShopCategory').value, location:document.getElementById('editShopLocation').value.trim(), contact:{ phone:document.getElementById('editShopPhone').value.trim(), email:document.getElementById('editShopEmail').value.trim() }, tin:document.getElementById('editShopTin').value.trim() };
+        await update(ref(database, `shops/${fkey}`), updates);
+        const idx = shops.findIndex(s=>s.firebaseKey===fkey); if(idx!==-1) { shops[idx]={...shops[idx], ...updates}; currentShop = shops[idx]; }
+        document.getElementById('editShopModal').classList.remove('active'); renderCurrentTab(); showToast(t('shopUpdated') || 'Shop updated');
+      } catch(e) { showToast(t('errorUpdatingShop') || 'Error updating shop','error'); } finally { setLoading(false); }
+    });
+
+    // --- add product modal - MODIFIED to use sell.html format ---
+    window.openAddProductModal = function() {
+      if(!currentShop) return;
+      editingProduct = null; productImageUrls = [null,null,null];
+      document.querySelectorAll('#productImageGrid .image-preview-small').forEach(p=>p.style.backgroundImage='');
+      
+      // Reset form fields
+      document.getElementById('shopProductName').value = '';
+      document.getElementById('shopProductCategory').value = '';
+      document.getElementById('shopProductDesc').value = '';
+      document.getElementById('shopProductNegociable').checked = false;
+      document.getElementById('shopProductPrice').value = '';
+      document.getElementById('editProductFirebaseKey').value = '';
+      
+      // Set seller type to 'shop' by default
+      document.getElementById('sellerType').value = 'shop';
+      
+      // Set shop info fields
+      document.getElementById('shopId').value = currentShop.id;
+      document.getElementById('shopName').value = currentShop.name;
+      document.getElementById('shopPhone').value = currentShop.contact.phone;
+      document.getElementById('shopLocation').value = currentShop.location;
+      
+      document.getElementById('saveShopProductBtn').style.display = 'inline-flex';
+      document.getElementById('updateShopProductBtn').style.display = 'none';
+      document.getElementById('addProductModal').classList.add('active');
+      setupProductImageUploads();
+    };
+    
+    function setupProductImageUploads() {
+      const inputs = document.querySelectorAll('#productImageGrid .file-input');
+      const previews = [document.getElementById('productPreview0'),document.getElementById('productPreview1'),document.getElementById('productPreview2')];
+      inputs.forEach((inp,idx)=>{ 
+        const newInp = inp.cloneNode(true); 
+        inp.parentNode.replaceChild(newInp, inp); 
+        newInp.addEventListener('change', e=>{ 
+          const f = e.target.files[0]; if(!f) { previews[idx].style.backgroundImage=''; productImageUrls[idx]=null; return; } 
+          const r = new FileReader(); r.onload = ev=>{ productImageUrls[idx]=ev.target.result; previews[idx].style.backgroundImage=`url('${ev.target.result}')`; }; r.readAsDataURL(f); 
+        }); 
+      });
+    }
+    
+    document.getElementById('saveShopProductBtn')?.addEventListener('click', async ()=>{
+      const name = document.getElementById('shopProductName').value.trim();
+      const category = document.getElementById('shopProductCategory').value;
+      const description = document.getElementById('shopProductDesc').value.trim();
+      const negotiable = document.getElementById('shopProductNegociable').checked;
+      const price = parseFloat(document.getElementById('shopProductPrice').value);
+      const sellerType = document.getElementById('sellerType').value;
+      
+      if(!name||!category||!description||isNaN(price)||price<=0) { 
+        showToast(t('pleaseFillAll') || 'Fill required fields','error'); 
+        return; 
+      }
+      
+      setLoading(true);
+      
+      try {
+        const productId = generateProductId();
+        const timestamp = new Date().toISOString();
+        
+        // Base product data following sell.html format
+        const productData = {
+          productId: productId,
+          name: name,
+          category: category,
+          description: description,
+          negotiable: negotiable,
+          price: price,
+          postedBy: currentUser.uid,
+          postedByEmail: currentUser.email,
+          timestamp: timestamp,
+          status: 'active',
+          verified: false,
+          sellerType: sellerType
+        };
+        
+        // Add seller/ shop info based on type
+        if (sellerType === 'shop') {
+          productData.shopId = currentShop.id;
+          productData.shopName = currentShop.name;
+          productData.shopPhone = currentShop.contact.phone;
+          productData.shopLocation = currentShop.location;
+          productData.sellerName = currentShop.name;
+          productData.sellerPhone = currentShop.contact.phone;
+          productData.sellerLocation = currentShop.location;
+          productData.sellerEmail = currentShop.contact.email;
+        } else {
+          // Account sell - use user profile
+          productData.sellerName = userProfile?.displayName || currentUser.email?.split('@')[0] || t('guest');
+          productData.sellerPhone = userProfile?.phone || '';
+          productData.sellerEmail = currentUser.email || '';
+          productData.sellerLocation = userProfile?.location || '';
+        }
+        
+        // Add images if they exist
+        const validImages = productImageUrls.filter(url => url !== null);
+        if (validImages[0]) productData.image1 = validImages[0];
+        if (validImages[1]) productData.image2 = validImages[1];
+        if (validImages[2]) productData.image3 = validImages[2];
+        
+        // Save to Firebase
+        const productsRef = ref(database, 'products');
+        const newProductRef = push(productsRef);
+        await set(newProductRef, productData);
+        
+        // Show success message
+        showToast(`${name} ${t('productRegistered')}`);
+        
+        // Reset form
+        document.getElementById('shopProductName').value = '';
+        document.getElementById('shopProductCategory').value = '';
+        document.getElementById('shopProductDesc').value = '';
+        document.getElementById('shopProductNegociable').checked = false;
+        document.getElementById('shopProductPrice').value = '';
+        
+        // Clear image previews
+        const previews = [document.getElementById('productPreview0'),document.getElementById('productPreview1'),document.getElementById('productPreview2')];
+        previews.forEach(p => p.style.backgroundImage = '');
+        productImageUrls = [null,null,null];
+        
+        document.getElementById('addProductModal').classList.remove('active');
+        
+        // Reload products
+        await loadProducts();
+        
+      } catch(e) { 
+        console.error('Error adding product:', e);
+        showToast(t('errorRegistering') || 'Error adding product','error'); 
+      } finally { 
+        setLoading(false); 
+      }
+    });
+
+    window.editShopProduct = function(productId) {
+      const prod = products.find(p=>p.id===productId); if(!prod) return;
+      editingProduct = prod;
+      productImageUrls = [null,null,null];
+      document.getElementById('shopProductName').value = prod.name;
+      document.getElementById('shopProductCategory').value = prod.category;
+      document.getElementById('shopProductDesc').value = prod.description;
+      document.getElementById('shopProductNegociable').checked = prod.negociable;
+      document.getElementById('shopProductPrice').value = prod.price;
+      document.getElementById('editProductFirebaseKey').value = prod.firebaseKey;
+      
+      // Set seller type
+      document.getElementById('sellerType').value = prod.sellerType || 'shop';
+      
+      // Set shop info
+      document.getElementById('shopId').value = currentShop.id;
+      document.getElementById('shopName').value = currentShop.name;
+      document.getElementById('shopPhone').value = currentShop.contact.phone;
+      document.getElementById('shopLocation').value = currentShop.location;
+      
+      const previews = [document.getElementById('productPreview0'),document.getElementById('productPreview1'),document.getElementById('productPreview2')];
+      previews.forEach((p,i)=>p.style.backgroundImage='');
+      prod.images.forEach((img,i)=>{ if(i<3) { previews[i].style.backgroundImage=`url('${img}')`; productImageUrls[i]=img; } });
+      document.getElementById('saveShopProductBtn').style.display = 'none';
+      document.getElementById('updateShopProductBtn').style.display = 'inline-flex';
+      document.getElementById('addProductModal').classList.add('active');
+      setupProductImageUploads();
+    };
+    
+    document.getElementById('updateShopProductBtn')?.addEventListener('click', async ()=>{
+      if(!editingProduct) return;
+      const name = document.getElementById('shopProductName').value.trim();
+      const cat = document.getElementById('shopProductCategory').value;
+      const desc = document.getElementById('shopProductDesc').value.trim();
+      const negotiable = document.getElementById('shopProductNegociable').checked;
+      const price = parseFloat(document.getElementById('shopProductPrice').value);
+      const sellerType = document.getElementById('sellerType').value;
+      const fkey = document.getElementById('editProductFirebaseKey').value;
+      
+      if(!name||!cat||!desc||isNaN(price)||price<=0) { 
+        showToast(t('pleaseFillAll') || 'Fill required fields','error'); 
+        return; 
+      }
+      
+      setLoading(true);
+      
+      try {
+        const updates = { 
+          name, 
+          category:cat, 
+          description:desc, 
+          negotiable, 
+          price,
+          sellerType: sellerType
+        };
+        
+        // Update based on seller type
+        if (sellerType === 'shop') {
+          updates.shopId = currentShop.id;
+          updates.shopName = currentShop.name;
+          updates.shopPhone = currentShop.contact.phone;
+          updates.shopLocation = currentShop.location;
+          updates.sellerName = currentShop.name;
+          updates.sellerPhone = currentShop.contact.phone;
+          updates.sellerLocation = currentShop.location;
+          updates.sellerEmail = currentShop.contact.email;
+        } else {
+          updates.sellerName = userProfile?.displayName || currentUser.email?.split('@')[0] || t('guest');
+          updates.sellerPhone = userProfile?.phone || '';
+          updates.sellerEmail = currentUser.email || '';
+          updates.sellerLocation = userProfile?.location || '';
+          // Remove shop fields
+          updates.shopId = null;
+          updates.shopName = null;
+          updates.shopPhone = null;
+          updates.shopLocation = null;
+        }
+        
+        if(productImageUrls[0]) updates.image1 = productImageUrls[0];
+        if(productImageUrls[1]) updates.image2 = productImageUrls[1];
+        if(productImageUrls[2]) updates.image3 = productImageUrls[2];
+        
+        await update(ref(database, `products/${fkey}`), updates);
+        
+        document.getElementById('addProductModal').classList.remove('active'); 
+        showToast(t('productUpdated') || 'Product updated'); 
+        await loadProducts();
+        
+      } catch(e) { 
+        console.error('Error updating product:', e);
+        showToast(t('errorUpdatingProduct') || 'Error updating product','error'); 
+      } finally { 
+        setLoading(false); 
+      }
+    });
+
+    // --- delete product with confirmation ---
+    window.deleteShopProduct = async function(productId, productName) {
+      const confirmed = await showDeleteConfirmation(productName);
+      if(!confirmed) return;
+      const prod = products.find(p=>p.id===productId); if(!prod) return;
+      setLoading(true);
+      try { await remove(ref(database, `products/${prod.firebaseKey}`)); products = products.filter(p=>p.id!==productId); renderCurrentTab(); showToast(`"${productName}" ${t('deleted') || 'deleted'}`); } catch(e) { showToast(t('errorDeleting') || 'Error deleting','error'); } finally { setLoading(false); }
+    };
+
+    // --- verification request modal ---
+    window.openVerifyRequestModal = function() {
+      if(!currentShop) return;
+      document.getElementById('verifyShopName').value = currentShop.name;
+      document.getElementById('verifyShopTin').value = currentShop.tin;
+      document.getElementById('verifyShopPhone').value = currentShop.contact.phone;
+      document.getElementById('verifyShopEmail').value = currentShop.contact.email;
+      document.getElementById('verifyShopLocation').value = currentShop.location;
+      document.getElementById('verifyShopDesc').value = currentShop.description;
+      document.getElementById('verifyRequestModal').classList.add('active');
+    };
+    document.getElementById('submitVerifyRequestBtn')?.addEventListener('click', async ()=>{
+      const notes = document.getElementById('verifyNotes').value.trim();
+      setLoading(true);
+      try {
+        const reqRef = push(ref(database,'verificationRequests'));
+        await set(reqRef, { requestId:'REQ-'+Date.now(), shopId:currentShop.id, shopName:currentShop.name, ownerUid:currentUser.uid, ownerEmail:currentUser.email, shopData:{ name:currentShop.name, description:currentShop.description, category:currentShop.category, location:currentShop.location, phone:currentShop.contact.phone, email:currentShop.contact.email, tin:currentShop.tin, posterImage:currentShop.posterImage }, notes, status:'pending', submittedAt:new Date().toISOString() });
+        document.getElementById('verifyRequestModal').classList.remove('active'); showToast(t('requestSent') || 'Verification request sent');
+      } catch(e) { showToast(t('errorSendingRequest') || 'Error sending request','error'); } finally { setLoading(false); }
+    });
+
+    // --- close modal listeners ---
+    document.getElementById('closeEditShopModal')?.addEventListener('click', ()=> document.getElementById('editShopModal').classList.remove('active'));
+    document.getElementById('closeAddProductModal')?.addEventListener('click', ()=>{ document.getElementById('addProductModal').classList.remove('active'); document.getElementById('saveShopProductBtn').style.display='inline-flex'; document.getElementById('updateShopProductBtn').style.display='none'; editingProduct=null; });
+    document.getElementById('closeVerifyModal')?.addEventListener('click', ()=> document.getElementById('verifyRequestModal').classList.remove('active'));
+
+    // --- drawer controls ---
+    const drawer = document.getElementById('drawer');
+    const overlay = document.getElementById('drawerOverlay');
+    const drawerTrigger = document.getElementById('drawerTrigger');
+    const closeDrawer = document.getElementById('closeDrawerBtn');
+    const drawerCart = document.getElementById('drawerCart');
+    const drawerProfile = document.getElementById('drawerProfile');
+    const drawerHelp = document.getElementById('drawerHelp');
+    const drawerLogout = document.getElementById('drawerLogout');
+
+    if(drawerTrigger) {
+      drawerTrigger.addEventListener('click', () => {
+        drawer.classList.add('active');
+        overlay.classList.add('active');
+      });
+    }
+    function closeDrawerFn() {
+      drawer.classList.remove('active');
+      overlay.classList.remove('active');
+    }
+    if(overlay) overlay.addEventListener('click', closeDrawerFn);
+    if(closeDrawer) closeDrawer.addEventListener('click', closeDrawerFn);
+
+    if(drawerCart) {
+      drawerCart.addEventListener('click', () => { window.location.href = 'profile.html'; });
+    }
+    if(drawerProfile) {
+      drawerProfile.addEventListener('click', () => { window.location.href = 'profile.html'; });
+    }
+    if(drawerHelp) {
+      drawerHelp.addEventListener('click', () => { document.getElementById('contactModal').classList.add('active'); closeDrawerFn(); });
+    }
+    if(drawerLogout) {
+      drawerLogout.addEventListener('click', async () => { await signOut(auth); showToast(t('loggedOut') || 'Logged out', 'success'); closeDrawerFn(); setTimeout(() => window.location.href = 'index.html', 1000); });
+    }
+
+    // --- auth ---
+    onAuthStateChanged(auth, async (user) => {
+      if(!user) { window.location.href='index.html'; return; }
+      currentUser = user;
+      await loadUserProfile(); 
+      await loadShops(); 
+      await loadProducts(); 
+      await updateCartCount();
+      updateProfileSection();
+      if(!currentShop) setActiveTab('all-shops');
+      else setActiveTab('my-shop');
+    });
+
+    // --- help modal / lang ---
+    document.addEventListener('DOMContentLoaded', ()=>{
+      const modal = document.getElementById('contactModal');
+      document.getElementById('closeModalBtn')?.addEventListener('click', ()=> modal.classList.remove('active'));
+      window.addEventListener('click', e=>{ 
+        if(e.target===modal) modal.classList.remove('active'); 
+        if(e.target===document.getElementById('editShopModal')) document.getElementById('editShopModal').classList.remove('active'); 
+        if(e.target===document.getElementById('addProductModal')) document.getElementById('addProductModal').classList.remove('active'); 
+        if(e.target===document.getElementById('verifyRequestModal')) document.getElementById('verifyRequestModal').classList.remove('active'); 
+        if(e.target===document.getElementById('deleteConfirmModal')) document.getElementById('deleteConfirmModal').classList.remove('active'); 
+      });
+      document.getElementById('modalHelpCenter').addEventListener('click', (e)=>{ e.preventDefault(); showToast(t('faq'), 'warning'); });
+
+      const langOpts = document.querySelectorAll('.lang-option');
+      langOpts.forEach(opt => {
+        opt.addEventListener('click', (e) => {
+          const lang = e.currentTarget.dataset.lang;
+          if (lang) {
+            currentLang = lang;
+            localStorage.setItem('guraneza_lang', currentLang);
+            updateLanguage();
+            closeDrawerFn();
+          }
+        });
+      });
+
+      const savedLang = localStorage.getItem('guraneza_lang') || 'en';
+      currentLang = savedLang;
+      updateLanguage();
+    });
+  </script>
+</body>
+</html>
